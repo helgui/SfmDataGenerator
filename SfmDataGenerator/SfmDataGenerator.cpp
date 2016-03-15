@@ -1,17 +1,11 @@
 #include "stdafx.h"
+#include "SfmData.h"
 
 using namespace std;
 using namespace cv;
 
 void viewDataset(const string &inFile);
 void genDataset(const string &inFile, const string &outFile);
-void noisePoints(const string &inFile, const string &outFile, double stDev);
-void addMatches(const string &inFile, const string & outFile, int count);
-
-int focalX;
-int focalY;
-int K1;
-int K2;
 
 int main(int argc, char *argv[]) {
 	String keys =
@@ -20,6 +14,7 @@ int main(int argc, char *argv[]) {
 		"{in             |<none>| Input file                                        }"
 		"{out            |<none>| Output file                                       }"
 		"{count          |50    | Count of false matches                            }"
+		"{ratio          |0.2   | Ratio of false matches                            }"
 		;
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v1.0.0");
@@ -56,6 +51,9 @@ int main(int argc, char *argv[]) {
 		string inFile = parser.get<string>("in", false);
 		string outFile = parser.get<string>("out", false);
 		double stdDev = parser.get<double>("stdev", true);
+		SfmData sfmData(inFile);
+		sfmData.addGaussianNoise(stdDev);
+		sfmData.save(outFile);
 		if (!parser.check()) {
 			parser.printErrors();
 			return 0;
@@ -65,7 +63,21 @@ int main(int argc, char *argv[]) {
 	if (cmd == "falsm") {
 		string inFile = parser.get<string>("in", false);
 		string outFile = parser.get<string>("out", false);
-		int count = parser.get<int>("count", true);
+		if (!parser.check()) {
+			parser.printErrors();
+			return 0;
+		}
+		SfmData sfmData(inFile);
+		if (parser.has("ratio")) {
+			sfmData.addFalseObservations(parser.get<double>("ratio", true));
+		} else {
+			sfmData.addFalseObservations(parser.get<int>("count", true));
+		}
+		if (!parser.check()) {
+			parser.printErrors();
+			return 0;
+		}
+		sfmData.save(outFile);
 		return 0;
 	}
 	return 0;
@@ -74,15 +86,7 @@ int main(int argc, char *argv[]) {
 void genDataset(const string &inFile, const string &outFile) {
 	const string winName = "Camera intrinsics";
 	viz::Viz3d viz("virtual camera");
+	viz::Camera cam = viz.getCamera();
 	viz.setBackgroundColor(viz::Color::white());
 	viz::Mesh mesh = viz::readMesh(inFile);
-	namedWindow("Camera intrinsics");
-	resizeWindow(winName, 500, 170);
-	createTrackbar("Focal X", winName, &focalX, 1024);
-	createTrackbar("Focal Y", winName, &focalY, 1024);
-	createTrackbar("k_1", winName, &K1, 100);
-	createTrackbar("k_2", winName, &K2, 100);
-	viz.showWidget("mesh", viz::WMesh(mesh));
-	viz.spin();
 }
-
