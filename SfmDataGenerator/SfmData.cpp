@@ -33,22 +33,22 @@ void writeMatx(ostream & os, const cv::Matx<Tp, m, n> & mat) {
 }
 
 SfmData::SfmData()
-	: views(), cloud(), rvecs(), tvecs(), intrinsics(), dists(), maxIdx(-1) {
+	: views(), cloud(), cameras(), maxIdx(-1) {
 	
 }
 
-SfmData::SfmData(const string &filename) {
+SfmData::SfmData(const string &filename)
+	: maxIdx(-1) {
 	load(filename);
 }
 
-void SfmData::addView(const cv::Matx33d &intrinsic, const cv::Vec3d &rvec, const cv::Vec3d &tvec, const Distortion &dist, const vector<Observation> &view) {
+void SfmData::addView(const Camera &cam, const vector<Observation> &view, const string &imgFile) {
 	for (const Observation& obs : view) {
 		maxIdx = max(maxIdx, obs.d);
 	}
-	intrinsics.push_back(intrinsic);
-	rvecs.push_back(rvec);
-	tvecs.push_back(tvec);
-	dists.push_back(dist);
+	views.push_back(view);
+	cameras.push_back(cam);
+	images.push_back(imgFile);
 }
 
 void SfmData::fillCloud(const cv::Mat & mat) {
@@ -103,13 +103,14 @@ bool SfmData::saveToTxt(const string &filename) const {
 		return false;
 	out << views.size() << ' ' << cloud.size() << endl;
 	for (int i = 0; i < (int)views.size(); ++i) {
-		writeMatx(out, intrinsics[i]);
+		out << images[i] << endl;
+		writeMatx(out, cameras[i].K);
 		out << endl;
-		writeMatx(out, rvecs[i]);
+		writeMatx(out, cameras[i].R);
 		out << endl;
-		writeMatx(out, tvecs[i]);
+		writeMatx(out, cameras[i].t);
 		out << endl;
-		out << dists[i].first << ' ' << dists[i].second << endl;
+		out << cameras[i].k1 << ' ' << cameras[i].k2 << endl;
 		out << views[i].size() << endl;
 		for (const Observation& obs : views[i]) {
 			out << obs.d << ' ' << obs.x << ' ' << obs.y << endl;
@@ -160,19 +161,22 @@ void SfmData::addFalseObservations(double ratio) {
 
 void SfmData::show() const {
 	viz::Viz3d viz("sfmData");
+	cerr << "here";
 	viz.setBackgroundColor(viz::Color::white());
 	Mat pts(maxIdx + 1, 1, CV_64FC3);
+	cerr << maxIdx;
 	for (int i = 0; i <= maxIdx; ++i)
 		pts.at<Vec3d>(i) = cloud[i];
 	viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
+	cerr << "here" << endl;
 	for (int i = 0; i < (int)views.size(); ++i) {
-		auto pose = Affine3d(rvecs[i], tvecs[i]);
 		double sz = 1e10;
 		for (const Observation& obs : views[i]) {
-			auto pnt = pose*cloud[obs.d];
+			auto pnt = cameras[i].pose()*cloud[obs.d];
 			sz = min(sz, fabs(pnt.z / 10.0));
 		}
-		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(intrinsics[i], sz, viz::Color::red()), pose.inv());
+		cerr << i << endl;
+		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());
 	}
 	viz.spin();
 }
@@ -184,22 +188,24 @@ bool SfmData::loadFromTxt(const string &filename) {
 	int viewCount, pointCount;
 	in >> viewCount >> pointCount;
 	for (int i = 0; i < viewCount; ++i) {
-		views.push_back(vector<Observation>());
-		cv::Matx33d intrinsic;
-		readMatx(in, intrinsic);
-		cv::Vec3d rvec, tvec;
-		readMatx(in, rvec);
-		readMatx(in, tvec);
-		Distortion dist;
-		in >> dist.first >> dist.second;
+		string imgFile;
+		in.ignore();
+		getline(in, imgFile);
+		vector<Observation> view;
+		Camera cam;
+		readMatx(in, cam.K);
+		readMatx(in, cam.R);
+		readMatx(in, cam.t);
+		in >> cam.k1 >> cam.k2;
 		int obsCount;
 		int d;
 		double x, y;
 		in >> obsCount;
 		for (int j = 0; j < obsCount; ++j) {
 			in >> d >> x >> y;
-			views.back().emplace_back(d, x, y);
+			view.emplace_back(d, x, y);
 		}
+		addView(cam, view, imgFile);
 	}
 	for (int i = 0; i < pointCount; ++i) {
 		double x, y, z;
