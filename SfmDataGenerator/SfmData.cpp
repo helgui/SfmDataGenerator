@@ -140,22 +140,13 @@ void SfmData::addGaussianNoise(double stDev) {
 }
 
 void SfmData::addFalseObservations(int count) {
-	uniform_int_distribution<int> distViews(0, views.size() - 1);
-	mt19937 gen(chrono::system_clock::now().time_since_epoch().count());
 	for (int i = 0; i < count; ++i) {
-		while (true) {
-			int view1 = distViews(gen);
-			int view2 = distViews(gen);
-			if (view1 == view2)
-				continue;
-			uniform_int_distribution<int> distObs1(0, views[view1].size() - 1), distObs2(0, views[view2].size() - 1);
-			int obs1 = distObs1(gen);
-			int obs2 = distObs2(gen);
-			if (views[view1][obs1].d == views[view2][obs2].d)
-				continue;
-			views[view1][obs1].d = views[view2][obs2].d;
-			break;
-		}
+		int viewIdx = rand() % views.size();
+		int obsIdx = rand() % views[viewIdx].size();
+		int newValue = rand() % (maxIdx + 1);
+		while (views[viewIdx][obsIdx].d == newValue)
+			newValue = rand() % (maxIdx + 1);
+		views[viewIdx][obsIdx].d = newValue;
 	}
 }
 
@@ -163,7 +154,7 @@ void SfmData::addFalseObservations(double ratio) {
 	int total = 0;
 	for (const auto &view : views)
 		total += view.size();
-	int count = (ratio*total) / (1.0 - ratio);
+	int count = ratio*total;
 	addFalseObservations(count);
 }
 
