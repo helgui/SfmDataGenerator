@@ -4,34 +4,6 @@
 using namespace std;
 using namespace cv;
 
-inline string toLower(const string &s) {
-	string res(s);
-	for (char c : res)
-		c = tolower(c);
-	return res;
-}
-
-inline string fileExt(const string &filename) {
-	for (int j = filename.size() - 1; j >= 0; --j) {
-		if (filename[j] == '.') {
-			return toLower(filename.substr(j, filename.size() - j));
-		}
-	}
-	return string();
-}
-
-template<class Tp, int m, int n>
-void readMatx(istream & is, cv::Matx<Tp, m, n> & mat) {
-	for (int i = 0; i < n*m; ++i)
-		is >> mat.val[i];
-}
-
-template<class Tp, int m, int n>
-void writeMatx(ostream & os, const cv::Matx<Tp, m, n> & mat) {
-	for (int i = 0; i < n*m; ++i)
-		os << mat.val[i] << ' ';
-}
-
 SfmData::SfmData()
 	: views(), cloud(), cameras(), maxIdx(-1) {
 	
@@ -51,7 +23,7 @@ void SfmData::addView(const Camera &cam, const vector<Observation> &view, const 
 	images.push_back(imgFile);
 }
 
-void SfmData::fillCloud(const cv::Mat & mat) {
+void SfmData::fillCloud(const Mat & mat) {
 	vector<int> cnt(maxIdx + 1, 0);
 	for (const auto& view : views) {
 		for (const Observation& obs : view) {
@@ -63,7 +35,7 @@ void SfmData::fillCloud(const cv::Mat & mat) {
 			cnt[i] = -1;
 		} else {
 			cnt[i] = cloud.size();
-			cloud.emplace_back(mat.at<cv::Vec3f>(i)[0], mat.at<cv::Vec3f>(i)[1], mat.at<cv::Vec3f>(i)[2]);
+			cloud.emplace_back(mat.at<Vec3f>(i)[0], mat.at<Vec3f>(i)[1], mat.at<Vec3f>(i)[2]);
 		}
 	}
 	for (auto& view : views) {
@@ -116,7 +88,7 @@ bool SfmData::saveToTxt(const string &filename) const {
 			out << obs.d << ' ' << obs.x << ' ' << obs.y << endl;
 		}
 	}
-	for (const cv::Point3d pnt : cloud) {
+	for (const Point3d pnt : cloud) {
 		out << pnt.x << ' ' << pnt.y << ' ' << pnt.z << endl;
 	}
 }
@@ -138,6 +110,43 @@ void SfmData::addGaussianNoise(double stDev) {
 			obs.y += dist(gen);
 		}
 	}
+}
+
+void SfmData::showObservations(int viewIdx) const {
+	if (viewIdx >= (int)views.size())
+		return;
+	Mat img = imread(images[viewIdx]);
+	vector <KeyPoint> kp;
+	for (auto & obs : views[viewIdx])
+		kp.push_back(KeyPoint(Point2f(obs.x, obs.y), 5.0));
+	Mat outImg;
+	drawKeypoints(img, kp, outImg);
+	namedWindow("Observations", 1);
+	imshow("Observations", outImg);
+	waitKey();
+	destroyWindow("Observations");
+}
+
+void SfmData::showMatches(int viewIdx1, int viewIdx2) const {
+	Mat img1 = imread(images[viewIdx1]);
+	Mat img2 = imread(images[viewIdx2]);
+	vector <KeyPoint> kp1, kp2;
+	vector <Point2d> p1, p2;
+	getMatches(views[viewIdx1], views[viewIdx2], p1, p2);
+	for (int i = 0; i < (int)p1.size(); ++i)
+	{
+		kp1.push_back(KeyPoint(p1[i], 1.0));
+		kp2.push_back(KeyPoint(p2[i], 1.0));
+	}
+	vector <DMatch> matches;
+	for (int i = 0; i < (int)p1.size(); ++i)
+		matches.push_back(DMatch(i, i, 0));
+	Mat out;
+	drawMatches(img1, kp1, img2, kp2, matches, out);
+	namedWindow("Matches", 0);
+	imshow("Matches", out);
+	waitKey();
+	destroyWindow("Matches");
 }
 
 void SfmData::addFalseObservations(int count) {

@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <filesystem>
+#include <map>
 
 #include <opencv2/core.hpp>
 #include <opencv2/viz.hpp>

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Common.h"
 #include "SfmData.h"
 #include "version.h"
 
@@ -11,6 +12,17 @@ void genDataset(const string &inFile, const string &outDir, const string &outFil
 
 const string defaultFilename = "sfmData";
 const string defaultImgFolder = "images";
+const string keys =
+"{@cmd           |help  | Command to execute    }"
+"{stdev          |0.03  | Standart deviation    }"
+"{in             |<none>| Input file            }"
+"{out            |<none>| Output file or folder }"
+"{count          |50    | Count of false matches}"
+"{ratio          |0.2   | Ratio of false matches}"
+"{format         |txt   | Output file format    }"
+"{i1             |<none>| First view index      }"
+"{i2             |<none>| Second view index     }"
+;
 
 class CBData {
 public:
@@ -22,18 +34,12 @@ public:
 	cv::Mat &cloud;
 	CBData(viz::Viz3d &viz, cv::Mat &cloud, SfmData &sfmData, const string& imgFolder) :
 		viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder){}
+	Point3d getPoint(int idx) {
+		return cloud.at<Vec3f>(idx);
+	}
 };
 
 int main(int argc, char *argv[]) {
-	String keys =
-		"{@cmd           |help  | Command to execute (h, g, v, n, f)                  }"
-		"{stdev          |0.03  | Standart deviation  (only for noise-points)         }"
-		"{in             |<none>| Input file                                          }"
-		"{out            |<none>| Output file or folder                               }"
-		"{count          |50    | Count of false matches (only for false-observations)}"
-		"{ratio          |0.2   | Ratio of false matches (only for false-obserbations)}"
-		"{format         |txt   | Output file format (only for generate)              }"
-		;
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
@@ -50,11 +56,28 @@ int main(int argc, char *argv[]) {
 	}
 	if (cmd == "view") {
 		string inFile = parser.get<string>("in", false);
+		int i1 = -1, i2 = -1;
+		if (parser.has("i2")) {
+			i1 = parser.get<int>("i1");
+			i2 = parser.get<int>("i2");
+		}
+		else {
+			if (parser.has("i1"))
+				i1 = parser.get<int>("i1");
+		}
 		if (!parser.check()) {
 			parser.printErrors();
 			return 0;
 		}
 		SfmData sfmData(inFile);
+		if (i2 != -1) {
+			sfmData.showMatches(i1, i2);
+			return 0;
+		}
+		if (i1 != -1) {
+			sfmData.showObservations(i1);
+			return 0;
+		}
 		sfmData.show();
 		return 0;
 	}
@@ -122,11 +145,11 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 		if (event.action != viz::KeyboardEvent::KEY_UP || event.symbol != "space")
 			return;
 		CBData * data = (CBData *)cookie;
+		Size ws = data->viz.getWindowSize();
 		Camera cam(data->viz);
 		vector<Observation> view;
-		Size ws = data->viz.getWindowSize();
 		for (int i = 0; i < (data->n); ++i) {
-			Point3d pnt = data->cloud.at<Vec3f>(i);
+			Point3d pnt = data->getPoint(i);
 			if (cam.toCameraCoords(pnt).z <= 0.0)
 				continue;
 
@@ -137,7 +160,7 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 			if (winCoords.x < 0 || winCoords.y < 0 || winCoords.x > ws.width || winCoords.y > ws.height) continue;
 			
 			//Depth testing
-			if (winCoords.z > data->viz.getDepth(Point(winCoords.x, winCoords.y))) continue;
+			if (winCoords.z > data->viz.getDepth(Point(round(winCoords.x), round(winCoords.y)))) continue;
 			view.emplace_back(i, cam.projectPoint(pnt));
 		}
 		ostringstream os;
@@ -146,11 +169,11 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 		data->viz.saveScreenshot(os.str());
 		data->sfmData.addView(cam, view, os.str());
 	}, &data);
-	if (!exists(outDir) && !create_directories(outDir)) {
+	if (!createDir(outDir)) {
 		cerr << "Can't create output folder\n";
 		return;
 	}
-	if (!exists(outDir + "/" + defaultImgFolder) && !create_directories(outDir + "/" + defaultImgFolder)) {
+	if (!createDir(outDir + "/" + defaultImgFolder)) {
 		cerr << "Can't create output folder";
 		return;
 	}

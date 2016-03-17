@@ -125,7 +125,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OPENCV_LIBS);$(VTK_LIBS)\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vtkFiltersGeneral-6.2.lib;vtkFiltersGeometry-6.2.lib;vtkFiltersModeling-6.2.lib;vtkFiltersSources-6.2.lib;vtkFiltersTexture-6.2.lib;vtkImagingCore-6.2.lib;vtkInteractionStyle-6.2.lib;vtkFiltersCore-6.2.lib;vtkFiltersExtraction-6.2.lib;vtkCommonColor-6.2.lib;vtkCommonComputationalGeometry-6.2.lib;vtkCommonCore-6.2.lib;vtkCommonDataModel-6.2.lib;vtkCommonExecutionModel-6.2.lib;vtkCommonMath-6.2.lib;vtkCommonMisc-6.2.lib;vtkCommonSystem-6.2.lib;vtkCommonTransforms-6.2.lib;vtkRenderingCore-6.2.lib;vtkRenderingFreeType-6.2.lib;vtkRenderingContext2D-6.2.lib;vtkRenderingContextOpenGL-6.2.lib;vtkRenderingLOD-6.2.lib;vtkRenderingOpenGL-6.2.lib;vtkIOCore-6.2.lib;vtkIOExport-6.2.lib;vtkIOGeometry-6.2.lib;vtkIOImage-6.2.lib;vtkIOImport-6.2.lib;vtkIOPLY-6.2.lib;vtkjpeg-6.2.lib;vtkpng-6.2.lib;vtksys-6.2.lib;vtktiff-6.2.lib;vtkzlib-6.2.lib;vtkfreetype-6.2.lib;vtkftgl-6.2.lib;IlmImf.lib;ippicvmt.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_calib3d310.lib;opencv_core310.lib;opencv_highgui310.lib;opencv_imgcodecs310.lib;opencv_imgproc310.lib;opencv_ml310.lib;zlib.lib;opengl32.lib;glu32.lib;opencv_viz310.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vtkFiltersGeneral-6.2.lib;vtkFiltersGeometry-6.2.lib;vtkFiltersSources-6.2.lib;vtkCommonMath-6.2.lib;vtkFiltersModeling-6.2.lib;vtkFiltersTexture-6.2.lib;vtkImagingCore-6.2.lib;vtkInteractionStyle-6.2.lib;vtkFiltersCore-6.2.lib;vtkFiltersExtraction-6.2.lib;vtkCommonColor-6.2.lib;vtkCommonComputationalGeometry-6.2.lib;vtkCommonCore-6.2.lib;vtkCommonDataModel-6.2.lib;vtkCommonExecutionModel-6.2.lib;vtkCommonMisc-6.2.lib;vtkCommonSystem-6.2.lib;vtkCommonTransforms-6.2.lib;vtkRenderingCore-6.2.lib;vtkRenderingFreeType-6.2.lib;vtkRenderingContext2D-6.2.lib;vtkRenderingContextOpenGL-6.2.lib;vtkRenderingLOD-6.2.lib;vtkRenderingOpenGL-6.2.lib;vtkIOCore-6.2.lib;vtkIOExport-6.2.lib;vtkIOGeometry-6.2.lib;vtkIOImport-6.2.lib;vtkIOImage-6.2.lib;vtkIOPLY-6.2.lib;vtkjpeg-6.2.lib;vtkpng-6.2.lib;vtksys-6.2.lib;vtktiff-6.2.lib;vtkzlib-6.2.lib;vtkfreetype-6.2.lib;vtkftgl-6.2.lib;IlmImf.lib;ippicvmt.lib;libjasper.lib;libjpeg.lib;libpng.lib;libtiff.lib;libwebp.lib;opencv_calib3d310.lib;opencv_core310.lib;opencv_highgui310.lib;opencv_imgcodecs310.lib;opencv_imgproc310.lib;opencv_ml310.lib;opencv_features2d310.lib;zlib.lib;opengl32.lib;glu32.lib;opencv_viz310.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="SfmData.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="version.h" />
