@@ -14,7 +14,7 @@ SfmData::SfmData(const string &filename)
 	load(filename);
 }
 
-void SfmData::addView(const Camera &cam, const vector<Observation> &view, const string &imgFile) {
+void SfmData::addView(const Camera &cam, const View &view, const string &imgFile) {
 	for (const Observation& obs : view) {
 		maxIdx = max(maxIdx, obs.d);
 	}
@@ -224,10 +224,72 @@ bool SfmData::loadFromTxt(const string &filename) {
 	return true;
 }
 
+void SfmData::clear() {
+	cloud.clear();
+	views.clear();
+	cameras.clear();
+	images.clear();
+	maxIdx = -1;
+}
+
 bool SfmData::loadFromXmlOrYml(const string &filename) {
-	return true;
+	FileStorage fs(filename, FileStorage::READ);
+	if (!fs.isOpened())
+		return false;
+	clear();
+	for (auto &node : fs["views"]) {
+		View view;
+		Camera cam;
+		string imgFile;
+		node["image"] >> imgFile;
+		node["camera"] >> cam;
+		int it = 0;
+		auto obsNode = node["observations"];
+		for (auto it = obsNode.begin(); it != obsNode.end(); ++it) {
+			int d;
+			double x, y;
+			(*it) >> d;
+			++it;
+			(*it) >> x;
+			++it;
+			(*it) >> y;
+			view.emplace_back(d, x, y);
+		}
+		addView(cam, view, imgFile);
+	}
+	auto pointsNode = fs["points"];
+	for (auto it = pointsNode.begin(); it != pointsNode.end(); ++it) {
+		double x, y, z;
+		(*it) >> x;
+		++it;
+		(*it) >> y;
+		++it;
+		(*it) >> z;
+		cloud.emplace_back(x, y, z);
+	}
 }
 
 bool SfmData::saveToXmlOrYml(const string &filename) const {
+	FileStorage fs(filename, FileStorage::WRITE);
+	if (!fs.isOpened())
+		return false;
+	fs << "views" << "[";
+	for (int i = 0; i < (int)views.size(); ++i) {
+		fs << "{";
+		fs << "image" << images[i];
+		fs << "camera" << cameras[i];
+		fs << "observations" << "[";
+		for (const auto &obs : views[i])
+			fs << obs.d << obs.x << obs.y;
+		fs << "]";
+		fs << "}";
+	}
+	fs << "]";
+	fs << "points" << "[";
+	for (const auto &pnt : cloud) {
+		fs << pnt.x << pnt.y << pnt.z;
+	}
+	fs << "]";
+	fs.release();
 	return true;
 }

@@ -54,7 +54,7 @@ Camera::Camera(double fx, double fy, double cx, double cy, const cv::Matx33d &R,
 	K(0, 0) = fx;
 	K(0, 2) = cx;
 	K(1, 1) = fy;
-	K(1, 2) = cy;
+	K(1, 2) = cy;	
 }
 
 Camera::Camera(const cv::Matx34d & P, double k1, double k2)

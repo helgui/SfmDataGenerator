@@ -40,6 +40,7 @@ public:
 };
 
 int main(int argc, char *argv[]) {
+	
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
@@ -50,11 +51,11 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	if (cmd == "help") {
+	if (cmd == "h" || cmd == "help") {
 		parser.printMessage();
 		return 0;
 	}
-	if (cmd == "view") {
+	if (cmd == "v" || cmd == "view") {
 		string inFile = parser.get<string>("in", false);
 		int i1 = -1, i2 = -1;
 		if (parser.has("i2")) {
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
 		sfmData.show();
 		return 0;
 	}
-	if (cmd == "gen") {
+	if (cmd == "g" || cmd == "generate") {
 		string inFile = parser.get<string>("in", false);
 		string outDir = parser.get<string>("out", false);
 		string format = parser.get<string>("format", true);
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]) {
 		genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format);
 		return 0;
 	}
-	if (cmd == "noisp") {
+	if (cmd == "n" || cmd == "noise-points") {
 		string inFile = parser.get<string>("in", false);
 		string outFile = parser.get<string>("out", false);
 		double stdDev = parser.get<double>("stdev", true);
@@ -109,7 +110,7 @@ int main(int argc, char *argv[]) {
 		sfmData.save(outFile);
 		return 0;
 	}
-	if (cmd == "falsm") {
+	if (cmd == "f" || cmd == "false-observations") {
 		string inFile = parser.get<string>("in", false);
 		string outFile = parser.get<string>("out", false);
 		if (!parser.check()) {
@@ -128,6 +129,16 @@ int main(int argc, char *argv[]) {
 		}
 		sfmData.save(outFile);
 		return 0;
+	}
+	if (cmd == "c" || cmd == "convert") {
+		string inFile = parser.get<string>("in", false);
+		string outFile = parser.get<string>("out", false);
+		if (!parser.check()) {
+			parser.printErrors();
+			return 0;
+		}
+		SfmData sfmData(inFile);
+		sfmData.save(outFile);
 	}
 	return 0;
 }
