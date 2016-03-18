@@ -9,9 +9,7 @@
  * Исследовать чувствительность алгоритмов реконструкции к зашумленности входных данных
 
 ## Зависимости
-
 ## Сборка
-
 ## Запуск
 PLY модели можно загрузить с сайтов:
  * [The Stanford 3D Scanning Repository](http://graphics.stanford.edu/data/3Dscanrep)
@@ -20,20 +18,5 @@ PLY модели можно загрузить с сайтов:
  * [PLY Files an ASCII Polygon Format](http://people.sc.fsu.edu/~jburkardt/data/ply/ply.html)
 
 ##Лицензия
-
 ##Автор
-Олег Яковлев
-*для связи с автором используйте*
-<iframe id="forum_embed"
-  src="javascript:void(0)"
-  scrolling="no"
-  frameborder="0"
-  width="900"
-  height="700">
-</iframe>
-<script type="text/javascript">
-  document.getElementById('forum_embed').src =
-     'https://groups.google.com/forum/embed/?place=forum/sfmdatagen'
-     + '&showsearch=true&showpopout=true&showtabs=false'
-     + '&parenturl=' + encodeURIComponent(window.location.href);
-</script>
+Олег Яковлев, maucra[at]gmail[dot]com
