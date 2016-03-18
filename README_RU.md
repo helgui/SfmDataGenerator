@@ -1,6 +1,2 @@
-# SfmDataGenerator
-[English](README.md)
-## Обзор
-## Зависимости
-## Сборка
-## Запуск
+п»ї#SfmDataGenerator
+##РћР±Р·РѕСЂ

@@ -45,4 +45,8 @@
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+    <None Include="..\README_RU.md" />
+  </ItemGroup>
 </Project>
