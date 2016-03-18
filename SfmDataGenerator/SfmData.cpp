@@ -88,7 +88,7 @@ bool SfmData::saveToTxt(const string &filename) const {
 			out << obs.d << ' ' << obs.x << ' ' << obs.y << endl;
 		}
 	}
-	for (const Point3d pnt : cloud) {
+	for (const Point3d &pnt : cloud) {
 		out << pnt.x << ' ' << pnt.y << ' ' << pnt.z << endl;
 	}
 }
@@ -133,8 +133,7 @@ void SfmData::showMatches(int viewIdx1, int viewIdx2) const {
 	vector <KeyPoint> kp1, kp2;
 	vector <Point2d> p1, p2;
 	getMatches(views[viewIdx1], views[viewIdx2], p1, p2);
-	for (int i = 0; i < (int)p1.size(); ++i)
-	{
+	for (int i = 0; i < (int)p1.size(); ++i) {
 		kp1.push_back(KeyPoint(p1[i], 1.0));
 		kp2.push_back(KeyPoint(p2[i], 1.0));
 	}
@@ -170,21 +169,18 @@ void SfmData::addFalseObservations(double ratio) {
 
 void SfmData::show() const {
 	viz::Viz3d viz("sfmData");
-	cerr << "here";
 	viz.setBackgroundColor(viz::Color::white());
 	Mat pts(maxIdx + 1, 1, CV_64FC3);
 	cerr << maxIdx;
 	for (int i = 0; i <= maxIdx; ++i)
 		pts.at<Vec3d>(i) = cloud[i];
 	viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
-	cerr << "here" << endl;
 	for (int i = 0; i < (int)views.size(); ++i) {
 		double sz = 1e10;
 		for (const Observation& obs : views[i]) {
 			auto pnt = cameras[i].pose()*cloud[obs.d];
 			sz = min(sz, fabs(pnt.z / 10.0));
 		}
-		cerr << i << endl;
 		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());
 	}
 	viz.spin();
