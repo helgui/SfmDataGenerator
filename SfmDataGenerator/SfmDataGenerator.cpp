@@ -5,13 +5,13 @@
 
 using namespace std;
 using namespace cv;
+//Using experimental filesystem API
 using experimental::filesystem::create_directories;
 using experimental::filesystem::exists;
 
-void genDataset(const string &inFile, const string &outDir, const string &outFile);
-
 const string defaultFilename = "sfmData";
 const string defaultImgFolder = "images";
+
 const string keys =
 "{@cmd           |help  | Command to execute    }"
 "{stdev          |0.03  | Standart deviation    }"
@@ -21,9 +21,40 @@ const string keys =
 "{ratio          |0.2   | Ratio of false matches}"
 "{format         |txt   | Output file format    }"
 "{i1             |<none>| First view index      }"
-"{i2             |<none>| Second view index     }"
-;
+"{i2             |<none>| Second view index     }";
 
+//Supported commands
+enum Command {
+	GENERATE,
+	VIEW,
+	NOISE_PTS,
+	FALSE_OBS,
+	HELP,
+	CONVERT
+};
+
+//Command aliases
+const map<string, Command> aliasOf = {
+	{ "g",					Command::GENERATE},
+	{ "gen",				Command::GENERATE},
+	{ "generate",			Command::GENERATE},
+	{ "v",					Command::VIEW},
+	{ "view",				Command::VIEW},
+	{ "h",					Command::HELP},
+	{ "?",					Command::HELP},
+	{ "help",				Command::HELP},
+	{ "n",					Command::NOISE_PTS},
+	{ "np",					Command::NOISE_PTS},
+	{ "noise-points",		Command::NOISE_PTS},
+	{ "c",					Command::CONVERT},
+	{ "conv",				Command::CONVERT},
+	{ "convert",			Command::CONVERT},
+	{ "f",					Command::FALSE_OBS},
+	{ "fo",					Command::FALSE_OBS},
+	{ "false-observations",	Command::FALSE_OBS}
+};
+
+//Data for Viz3d keyboard callback
 class CBData {
 public:
 	int n;
@@ -39,6 +70,8 @@ public:
 	}
 };
 
+void genDataset(const string &inFile, const string &outDir, const string &outFile);
+
 int main(int argc, char *argv[]) {
 	
 	CommandLineParser parser(argc, argv, keys);
@@ -50,95 +83,102 @@ int main(int argc, char *argv[]) {
 		parser.printErrors();
 		return 0;
 	}
-
-	if (cmd == "h" || cmd == "help") {
-		parser.printMessage();
+	auto it = aliasOf.find(cmd);
+	if (it == aliasOf.end()) {
+		cerr << "Unknown command \"" + cmd + "\"";
 		return 0;
 	}
-	if (cmd == "v" || cmd == "view") {
-		string inFile = parser.get<string>("in", false);
-		int i1 = -1, i2 = -1;
-		if (parser.has("i2")) {
-			i1 = parser.get<int>("i1");
-			i2 = parser.get<int>("i2");
+	switch (it->second) {
+		case Command::HELP: {
+			parser.printMessage();
+			return 0;
 		}
-		else {
-			if (parser.has("i1"))
+		case Command::VIEW: {
+			string inFile = parser.get<string>("in", false);
+			int i1 = -1, i2 = -1;
+			if (parser.has("i2")) {
 				i1 = parser.get<int>("i1");
-		}
-		if (!parser.check()) {
-			parser.printErrors();
+				i2 = parser.get<int>("i2");
+			}
+			else {
+				if (parser.has("i1")) i1 = parser.get<int>("i1");
+			}
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			SfmData sfmData(inFile);
+			if (i2 != -1) {
+				sfmData.showMatches(i1, i2);
+				return 0;
+			}
+			if (i1 != -1) {
+				sfmData.showObservations(i1);
+				return 0;
+			}
+			sfmData.show();
 			return 0;
 		}
-		SfmData sfmData(inFile);
-		if (i2 != -1) {
-			sfmData.showMatches(i1, i2);
+		case Command::GENERATE: {
+			string inFile = parser.get<string>("in", false);
+			string outDir = parser.get<string>("out", false);
+			string format = parser.get<string>("format", true);
+			if (format != "xml" && format != "yml" && format != "txt") {
+				cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
+				format = "txt";
+			}
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format);
 			return 0;
 		}
-		if (i1 != -1) {
-			sfmData.showObservations(i1);
+		case Command::NOISE_PTS: {
+			string inFile = parser.get<string>("in", false);
+			string outFile = parser.get<string>("out", false);
+			double stdDev = parser.get<double>("stdev", true);
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			SfmData sfmData(inFile);
+			sfmData.addGaussianNoise(stdDev);
+			sfmData.save(outFile);
 			return 0;
 		}
-		sfmData.show();
-		return 0;
-	}
-	if (cmd == "g" || cmd == "generate") {
-		string inFile = parser.get<string>("in", false);
-		string outDir = parser.get<string>("out", false);
-		string format = parser.get<string>("format", true);
-		if (format != "xml" && format != "yml" && format != "txt") {
-			cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
-			format = "txt";
-		}
-		if (!parser.check()) {
-			parser.printErrors();
+		case Command::FALSE_OBS: {
+			string inFile = parser.get<string>("in", false);
+			string outFile = parser.get<string>("out", false);
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			SfmData sfmData(inFile);
+			if (parser.has("ratio")) {
+				sfmData.addFalseObservations(parser.get<double>("ratio", true));
+			}
+			else {
+				sfmData.addFalseObservations(parser.get<int>("count", true));
+			}
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			sfmData.save(outFile);
 			return 0;
 		}
-		genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format);
-		return 0;
-	}
-	if (cmd == "n" || cmd == "noise-points") {
-		string inFile = parser.get<string>("in", false);
-		string outFile = parser.get<string>("out", false);
-		double stdDev = parser.get<double>("stdev", true);
-		if (!parser.check()) {
-			parser.printErrors();
+		case Command::CONVERT: {
+			string inFile = parser.get<string>("in", false);
+			string outFile = parser.get<string>("out", false);
+			if (!parser.check()) {
+				parser.printErrors();
+				return 0;
+			}
+			SfmData sfmData(inFile);
+			sfmData.save(outFile);
 			return 0;
 		}
-		SfmData sfmData(inFile);
-		sfmData.addGaussianNoise(stdDev);
-		sfmData.save(outFile);
-		return 0;
-	}
-	if (cmd == "f" || cmd == "false-observations") {
-		string inFile = parser.get<string>("in", false);
-		string outFile = parser.get<string>("out", false);
-		if (!parser.check()) {
-			parser.printErrors();
-			return 0;
-		}
-		SfmData sfmData(inFile);
-		if (parser.has("ratio")) {
-			sfmData.addFalseObservations(parser.get<double>("ratio", true));
-		} else {
-			sfmData.addFalseObservations(parser.get<int>("count", true));
-		}
-		if (!parser.check()) {
-			parser.printErrors();
-			return 0;
-		}
-		sfmData.save(outFile);
-		return 0;
-	}
-	if (cmd == "c" || cmd == "convert") {
-		string inFile = parser.get<string>("in", false);
-		string outFile = parser.get<string>("out", false);
-		if (!parser.check()) {
-			parser.printErrors();
-			return 0;
-		}
-		SfmData sfmData(inFile);
-		sfmData.save(outFile);
 	}
 	return 0;
 }
@@ -171,7 +211,7 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 			if (winCoords.x < 0 || winCoords.y < 0 || winCoords.x > ws.width || winCoords.y > ws.height) continue;
 			
 			//Depth testing
-			if (winCoords.z > data->viz.getDepth(Point(round(winCoords.x), round(winCoords.y)))) continue;
+			if (winCoords.z > data->viz.getDepth(Point((int)round(winCoords.x), (int)round(winCoords.y)))) continue;
 			view.emplace_back(i, cam.projectPoint(pnt));
 		}
 		ostringstream os;

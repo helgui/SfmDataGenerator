@@ -117,7 +117,7 @@ void SfmData::addGaussianNoise(double stDev) {
 		}
 	}
 	normal_distribution<double> dist(0.0, stDev);
-	mt19937 gen(chrono::system_clock::now().time_since_epoch().count());
+	mt19937 gen((unsigned)chrono::system_clock::now().time_since_epoch().count());
 	for (auto& view : views) {
 		for (auto& obs : view) {
 			obs.x += dist(gen);
@@ -132,7 +132,7 @@ void SfmData::showObservations(int viewIdx) const {
 	Mat img = imread(images[viewIdx]);
 	vector <KeyPoint> kp;
 	for (auto & obs : views[viewIdx])
-		kp.push_back(KeyPoint(Point2f(obs.x, obs.y), 5.0));
+		kp.push_back(KeyPoint(Point2f((float)obs.x, (float)obs.y), 5.0));
 	Mat outImg;
 	drawKeypoints(img, kp, outImg);
 	namedWindow("Observations", 1);
@@ -177,7 +177,7 @@ void SfmData::addFalseObservations(double ratio) {
 	int total = 0;
 	for (const auto &view : views)
 		total += view.size();
-	int count = ratio*total;
+	int count = (int)(ratio*total);
 	addFalseObservations(count);
 }
 
