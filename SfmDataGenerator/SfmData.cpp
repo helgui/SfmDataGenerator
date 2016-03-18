@@ -6,7 +6,6 @@ using namespace cv;
 
 SfmData::SfmData()
 	: views(), cloud(), cameras(), maxIdx(-1) {
-	
 }
 
 SfmData::SfmData(const string &filename)
@@ -24,12 +23,15 @@ void SfmData::addView(const Camera &cam, const View &view, const string &imgFile
 }
 
 void SfmData::fillCloud(const Mat & mat) {
+	
 	vector<int> cnt(maxIdx + 1, 0);
+	//Count observations of each point
 	for (const auto& view : views) {
 		for (const Observation& obs : view) {
 			cnt[obs.d]++;
 		}
 	}
+
 	for (int i = 0; i <= maxIdx; ++i) {
 		if (cnt[i] < 2) {
 			cnt[i] = -1;
@@ -38,6 +40,7 @@ void SfmData::fillCloud(const Mat & mat) {
 			cloud.emplace_back(mat.at<Vec3f>(i)[0], mat.at<Vec3f>(i)[1], mat.at<Vec3f>(i)[2]);
 		}
 	}
+
 	for (auto& view : views) {
 		int cur = 0;
 		for (int j = 0; j < (int)view.size(); ++j) {
@@ -47,6 +50,17 @@ void SfmData::fillCloud(const Mat & mat) {
 			}
 		}
 		view.resize(cur);
+	}
+
+	//Very slow O(|Views|^2) empty views cleaning
+	//I hope that there are O(1) empty views :) 
+	for (int i = 0; i < (int)views.size(); ++i) {
+		if (views[i].empty()) {
+			views.erase(views.begin() + i);
+			cameras.erase(cameras.begin() + i);
+			images.erase(images.begin() + i);
+			--i; //Elements after i-th idx are renumbered
+		}
 	}
 	maxIdx = cloud.size() - 1;
 }

@@ -4,10 +4,7 @@
 using namespace std;
 
 cv::Point2d Camera::projectPoint(const cv::Point3d & pnt) const {
-	auto p = R*pnt;
-	p.x += t[0];
-	p.y += t[1];
-	p.z += t[2];
+	auto p = toCameraCoords(pnt);
 	p.x /= p.z;
 	p.y /= p.z;
 	double r2 = p.x*p.x + p.y*p.y;
@@ -23,7 +20,6 @@ cv::Point3d Camera::toCameraCoords(const cv::Point3d &pnt) const {
 	p.z += t[2];
 	return p;
 }
-
 
 Camera::Camera(const cv::Matx33d &K, const cv::Matx33d &R, const cv::Vec3d &t, double k1, double k2)
 	: K(K), R(R), t(t), k1(k1), k2(k2){
