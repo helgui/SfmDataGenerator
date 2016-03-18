@@ -54,7 +54,6 @@ const map<string, Command> aliasOf = {
 	{ "false-observations",	Command::FALSE_OBS}
 };
 
-//Data for Viz3d keyboard callback
 class CBData {
 public:
 	int n;
@@ -73,7 +72,6 @@ public:
 void genDataset(const string &inFile, const string &outDir, const string &outFile);
 
 int main(int argc, char *argv[]) {
-	
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
