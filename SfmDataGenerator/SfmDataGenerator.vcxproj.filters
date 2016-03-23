@@ -1,66 +1,66 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Файлы исходного кода">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Заголовочные файлы">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Файлы ресурсов">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="SfmData.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="version.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Common.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="GenHelper.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="Slider.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="CameraCustomizer.h">
-      <Filter>Заголовочные файлы</Filter>
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="SfmDataGenerator.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="SfmData.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="GenHelper.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="Slider.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="CameraCustomizer.cpp">
-      <Filter>Файлы исходного кода</Filter>
+      <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
