@@ -63,7 +63,7 @@ static void write(cv::FileStorage &fs, const cv::String &, const Camera &cam) {
 	fs << cam.k1 << cam.k2;
 	fs << "]";
 }
-/*Deserializatin interface*/
+/*Deserialization interface*/
 static void read(const cv::FileNode &node, Camera &cam, const Camera &defaultCam) {
 	auto it = node.begin();
 	for (int i = 0; i < 9; ++i) {
