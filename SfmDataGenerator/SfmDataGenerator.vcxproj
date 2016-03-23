@@ -147,13 +147,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraCustomizer.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="GenHelper.h" />
     <ClInclude Include="SfmData.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Slider.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraCustomizer.cpp" />
+    <ClCompile Include="GenHelper.cpp" />
     <ClCompile Include="SfmDataGenerator.cpp" />
     <ClCompile Include="SfmData.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -162,6 +167,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Slider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

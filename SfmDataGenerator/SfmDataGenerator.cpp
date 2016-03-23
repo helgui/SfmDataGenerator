@@ -1,7 +1,9 @@
 #include "stdafx.h"
+#include "version.h"
 #include "Common.h"
 #include "SfmData.h"
-#include "version.h"
+#include "GenHelper.h"
+#include "Slider.h"
 
 using namespace std;
 using namespace cv;
@@ -54,21 +56,6 @@ const map<string, Command> aliasOf = {
 	{ "false-observations",	Command::FALSE_OBS}
 };
 
-class CBData {
-public:
-	int n;
-	int counter;
-	string imgFolder;
-	SfmData &sfmData;
-	viz::Viz3d &viz;
-	cv::Mat &cloud;
-	CBData(viz::Viz3d &viz, cv::Mat &cloud, SfmData &sfmData, const string& imgFolder) :
-		viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder){}
-	Point3d getPoint(int idx) {
-		return cloud.at<Vec3f>(idx);
-	}
-};
-
 void genDataset(const string &inFile, const string &outDir, const string &outFile);
 
 int main(int argc, char *argv[]) {
@@ -76,7 +63,6 @@ int main(int argc, char *argv[]) {
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
 	string cmd = parser.get<string>("@cmd", true);
-	
 	if (!parser.check()) {
 		parser.printErrors();
 		return 0;
@@ -183,41 +169,26 @@ int main(int argc, char *argv[]) {
 
 void genDataset(const string &inFile, const string &outDir, const string & outFile) {
 	SfmData sfmData;
-	const string winName = "Camera intrinsics";
-	viz::Viz3d viz("virtual camera");
+	viz::Viz3d viz("Virtual camera");
 	viz::Camera cam = viz.getCamera();
-	viz.setBackgroundColor(viz::Color::white());
+	//viz.setBackgroundColor(viz::Color::black());
 	viz::Mesh mesh = viz::readMesh(inFile);
 	viz.showWidget("mesh", viz::WMesh(mesh));
-	CBData data(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder);
+	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder);
 	viz.registerKeyboardCallback([](const viz::KeyboardEvent &event, void * cookie) -> void {
-		if (event.action != viz::KeyboardEvent::KEY_UP || event.symbol != "space")
+		if (event.action != viz::KeyboardEvent::KEY_UP)
 			return;
-		CBData * data = (CBData *)cookie;
-		Size ws = data->viz.getWindowSize();
-		Camera cam(data->viz);
-		vector<Observation> view;
-		for (int i = 0; i < (data->n); ++i) {
-			Point3d pnt = data->getPoint(i);
-			if (cam.toCameraCoords(pnt).z <= 0.0)
-				continue;
-
-			Point3d winCoords;
-			data->viz.convertToWindowCoordinates(pnt, winCoords);
-			
-			//Frustum testing
-			if (winCoords.x < 0 || winCoords.y < 0 || winCoords.x > ws.width || winCoords.y > ws.height) continue;
-			
-			//Depth testing
-			if (winCoords.z > data->viz.getDepth(Point((int)round(winCoords.x), (int)round(winCoords.y)))) continue;
-			view.emplace_back(i, cam.projectPoint(pnt));
+		GenHelper * helper = (GenHelper *)cookie;
+		if (event.symbol == "space") {
+			helper->takePhoto();
+			return;
 		}
-		ostringstream os;
-		data->counter++;
-		os << (data->imgFolder) << "/" << setw(6) << setfill('0') << data->counter  << ".png";
-		data->viz.saveScreenshot(os.str());
-		data->sfmData.addView(cam, view, os.str());
-	}, &data);
+		if (tolower(event.symbol[0]) == 'm') {
+			helper->changeCameraParams();
+			return;
+		}
+	}, &helper);
+
 	if (!createDir(outDir)) {
 		cerr << "Can't create output folder\n";
 		return;
@@ -226,7 +197,11 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 		cerr << "Can't create output folder";
 		return;
 	}
-	viz.spin();
+
+	while (!viz.wasStopped()) {
+		helper.showCameraParams();
+		viz.spinOnce(300, true);
+	}
 	sfmData.fillCloud(mesh.cloud);
 	sfmData.save(outFile);
 }
