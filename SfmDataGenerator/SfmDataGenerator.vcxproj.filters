@@ -63,7 +63,4 @@
     <None Include="..\README.md" />
     <None Include="..\README_RU.md" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\pictures\virtcam.png" />
-  </ItemGroup>
 </Project>
