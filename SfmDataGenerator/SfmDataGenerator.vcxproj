@@ -173,6 +173,9 @@
     <None Include="..\README.md" />
     <None Include="..\README_RU.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\pictures\virtcam.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
