@@ -24,7 +24,7 @@ SfmDataGenerator features:
 [Demo]()
 
 ## Pre-requisite
-SfmDataGenerator is written using OpenCV library with modified Viz module, which you can build from [repository](https://github.com/helgui/opencv). If you already have OpenCV library intalled, you only need to rebuild Viz module.
+SfmDataGenerator is written using OpenCV library with modified Viz module, which you can build from [repository](https://github.com/helgui/opencv). If you already have an OpenCV library installed, you only need to rebuild Viz module.
 ## Use
 See [manual](MANUAL.md)
 
