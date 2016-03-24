@@ -132,7 +132,7 @@ void SfmData::showObservations(int viewIdx) const {
 	Mat img = imread(images[viewIdx]);
 	vector <KeyPoint> kp;
 	for (auto & obs : views[viewIdx])
-		kp.push_back(KeyPoint(Point2f((float)obs.x, (float)obs.y), 5.0));
+		kp.emplace_back(Point2f((float)obs.x, (float)obs.y), 5.0f);
 	Mat outImg;
 	drawKeypoints(img, kp, outImg);
 	namedWindow("Observations", 1);
