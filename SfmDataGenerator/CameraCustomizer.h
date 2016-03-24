@@ -10,7 +10,6 @@ public:
 		if (changing)
 			return;
 		changing = 1;
-		callback();
 		cv::namedWindow(winName);
 		cv::imshow(winName, img);
 		struct Data {
@@ -66,6 +65,7 @@ public:
 		cv::destroyWindow(winName);
 		changing = 0;
 	}
+	void change();
 	double k1() const;
 	double k2() const;
 private:

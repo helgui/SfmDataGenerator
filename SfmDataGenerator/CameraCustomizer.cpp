@@ -33,6 +33,54 @@ CameraCustomizer::CameraCustomizer(const std::string &winName)
 	updateImage();
 }
 
+void CameraCustomizer::change() {
+	if (changing)
+		return;
+	changing = 1;
+	cv::namedWindow(winName);
+	cv::imshow(winName, img);
+	cv::setMouseCallback(winName, [](int event, int x, int y, int, void * cookie) -> void {
+		CameraCustomizer *params = (CameraCustomizer *)cookie;
+		if (event == cv::EVENT_LBUTTONDOWN) {
+			int idx = -1;
+			for (int i = 0; i < 2; ++i) {
+				if (params->rect[i].contains(cv::Point(x, y))) {
+					idx = i;
+					break;
+				}
+			}
+			if (idx == -1)
+				return;
+			cv::Point pnt = cv::Point(x, y) - (params->rect[idx].tl());
+			if (params->slider[idx].onTrack(pnt)) {
+				params->slider[idx].setPos(pnt.x - Slider::TRACK_OFFSET);
+				params->updateImage();
+				cv::imshow(params->winName, params->img);
+				return;
+			}
+			if (params->slider[idx].onButton(pnt)) {
+				params->control = idx;
+			}
+			return;
+		}
+		if (event == cv::EVENT_LBUTTONUP) {
+			params->control = -1;
+			return;
+		}
+		if (event == cv::EVENT_MOUSEMOVE) {
+			if (params->control == -1)
+				return;
+			cv::Point pnt = cv::Point(x, y) - (params->rect[params->control].tl());
+			params->slider[params->control].setPos(pnt.x - Slider::TRACK_OFFSET);
+			params->updateImage();
+			cv::imshow(params->winName, params->img);
+		}
+	}, this);
+	cv::waitKey();
+	cv::destroyWindow(winName);
+	changing = 0;
+}
+
 double CameraCustomizer::k1() const {
 	return slider[0].value();
 }
