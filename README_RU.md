@@ -1,4 +1,5 @@
 # SfmDataGenerator
+[English version](README.md)
 ## Обзор
 **SfmDataGenerator** - программный инструмент, позволяющий создавать реалистичные наборы данных для задачи разреженной реконструкции (*Struture from Motion, SfM*). Набор данных формируется
 в процессе виртуальной съемки 3D-модели, представленной в формате [PLY](http://graphics.stanford.edu/data/3Dscanrep/#file_format), с использованием модели проективной камеры (*pinhole camera*).
@@ -25,6 +26,7 @@
 SfmDataGenerator основан на библиотеке OpenCV с модифицированным модулем Viz, которую можно собрать из [репозитория](https://github.com/helgui/opencv). Если у вас уже установлена билиотека OpenCV, то необходимо лишь пересобрать модуль Viz из указанного репозитория. 
 ## Использование
 См. [руководство пользователя](MANUAL_RU.md)
+
 Необходимые для создания датасетов PLY-модели можно загрузить с сайтов:
  * [The Stanford 3D Scanning Repository](http://graphics.stanford.edu/data/3Dscanrep)
  * [Large geometric models archive](http://www.cc.gatech.edu/projects/large_models)
