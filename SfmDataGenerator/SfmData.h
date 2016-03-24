@@ -33,12 +33,16 @@ public:
 		4. finally fills SfmData::cloud
 	*/
 	void fillCloud(const cv::Mat &cloud);
-	/*Shows sfmData in 3D as cloud and camera frustums*/
+	/*Shows sfmData in 3D as cloud and camera frustums with*/
 	void show() const;
-	/*Shows observations of a given view*/
+	void show(std::ostream &os) const;
+
+	/*Shows observations of a given view with*/
 	void showObservations(int viewIdx) const;
+	void showObservations(int viewIdx, std::ostream &os) const;
 	/*Shows point correspondences between two views*/
-	void showMatches(int viewidx1, int viewIdx2) const;
+	void showMatches(int viewIdx1, int viewIdx2) const;
+	void showMatches(int viewidx1, int viewIdx2, std::ostream &os) const;
 	/*
 	Adds a Gaussian noise with given standart deviation
 	to coordinates of projection or
@@ -54,6 +58,9 @@ public:
 	void addFalseObservations(double ratio);
 	/*Clean up all data*/
 	void clear();
+	void showInfo(std::ostream & os = std::cout) const;
+	void showViewInfo(int idx1, std::ostream & os = std::cout) const;
+	void showMatchInfo(int idx1, int idx2, std::ostream & os = std::cout) const;
 private:
 	/*Maximum point descriptor*/
 	int maxIdx;

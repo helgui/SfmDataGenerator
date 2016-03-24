@@ -127,7 +127,7 @@ void SfmData::addGaussianNoise(double stDev) {
 }
 
 void SfmData::showObservations(int viewIdx) const {
-	if (viewIdx >= (int)views.size())
+	if (!btw(viewIdx, 0, (int)views.size()))
 		return;
 	Mat img = imread(images[viewIdx]);
 	vector <KeyPoint> kp;
@@ -141,25 +141,32 @@ void SfmData::showObservations(int viewIdx) const {
 	destroyWindow("Observations");
 }
 
+void SfmData::showObservations(int viewIdx, ostream &os) const {
+	showViewInfo(viewIdx, os);
+	showObservations(viewIdx);
+}
+
 void SfmData::showMatches(int viewIdx1, int viewIdx2) const {
+	if (!btw(viewIdx1, 0, (int)views.size()) || !btw(viewIdx2, 0, (int)views.size()))
+		return;
 	Mat img1 = imread(images[viewIdx1]);
 	Mat img2 = imread(images[viewIdx2]);
 	vector <KeyPoint> kp1, kp2;
-	vector <Point2d> p1, p2;
-	getMatches(views[viewIdx1], views[viewIdx2], p1, p2);
-	for (int i = 0; i < (int)p1.size(); ++i) {
-		kp1.push_back(KeyPoint(p1[i], 1.0));
-		kp2.push_back(KeyPoint(p2[i], 1.0));
-	}
+	getMatches(views[viewIdx1], views[viewIdx2], kp1, kp2);
 	vector <DMatch> matches;
-	for (int i = 0; i < (int)p1.size(); ++i)
-		matches.push_back(DMatch(i, i, 0));
+	for (int i = 0; i < (int)kp1.size(); ++i)
+		matches.emplace_back(i, i, 0.0f);
 	Mat out;
 	drawMatches(img1, kp1, img2, kp2, matches, out);
 	namedWindow("Matches", 0);
 	imshow("Matches", out);
 	waitKey();
 	destroyWindow("Matches");
+}
+
+void SfmData::showMatches(int viewIdx1, int viewIdx2, ostream &os) const {
+	showMatchInfo(viewIdx1, viewIdx2, os);
+	showMatches(viewIdx1, viewIdx2);
 }
 
 void SfmData::addFalseObservations(int count) {
@@ -182,10 +189,9 @@ void SfmData::addFalseObservations(double ratio) {
 }
 
 void SfmData::show() const {
-	viz::Viz3d viz("sfmData");
+	viz::Viz3d viz("Point cloud");
 	viz.setBackgroundColor(viz::Color::white());
 	Mat pts(maxIdx + 1, 1, CV_64FC3);
-	cerr << maxIdx;
 	for (int i = 0; i <= maxIdx; ++i)
 		pts.at<Vec3d>(i) = cloud[i];
 	viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
@@ -198,6 +204,11 @@ void SfmData::show() const {
 		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());
 	}
 	viz.spin();
+}
+
+void SfmData::show(ostream &os) const {
+	showInfo(os);
+	show();
 }
 
 bool SfmData::loadFromTxt(const string &filename) {
@@ -302,4 +313,30 @@ bool SfmData::saveToXmlOrYml(const string &filename) const {
 	fs << "]";
 	fs.release();
 	return true;
+}
+
+void SfmData::showInfo(ostream & os) const {
+	os << views.size() << " views" << endl;
+	os << cloud.size() << " points in cloud" << endl;
+}
+
+void SfmData::showViewInfo(int idx, ostream & os) const {
+	if (idx < 0 || idx >= (int)views.size()) {
+		os << "Incorrect view index" << endl;
+		return;
+	}
+	os << "View #" << idx << ' ' << views[idx].size() << " observations" << endl;
+}
+
+void SfmData::showMatchInfo(int idx1, int idx2, ostream & os) const {
+	if (!btw(idx1, 0, (int)views.size()) || !btw(idx2, 0, (int)views.size())) {
+		os << "Incorrect view index" << endl;
+		return;
+	}
+	showViewInfo(idx1, os);
+	showViewInfo(idx2, os);
+	vector<KeyPoint> kp1;
+	vector<KeyPoint> kp2;
+	getMatches(views[idx1], views[idx2], kp1, kp2);
+	os << kp1.size() << " matches" << endl;
 }

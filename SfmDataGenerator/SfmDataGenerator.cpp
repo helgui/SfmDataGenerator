@@ -93,14 +93,14 @@ int main(int argc, char *argv[]) {
 			}
 			SfmData sfmData(inFile);
 			if (i2 != -1) {
-				sfmData.showMatches(i1, i2);
+				sfmData.showMatches(i1, i2, cout);
 				return 0;
 			}
 			if (i1 != -1) {
-				sfmData.showObservations(i1);
+				sfmData.showObservations(i1, cout);
 				return 0;
 			}
-			sfmData.show();
+			sfmData.show(cout);
 			return 0;
 		}
 		case Command::GENERATE: {
@@ -171,7 +171,6 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 	SfmData sfmData;
 	viz::Viz3d viz("Virtual camera");
 	viz::Camera cam = viz.getCamera();
-	//viz.setBackgroundColor(viz::Color::black());
 	viz::Mesh mesh = viz::readMesh(inFile);
 	viz.showWidget("mesh", viz::WMesh(mesh));
 	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder);

@@ -1,15 +1,15 @@
 #include "stdafx.h"
 #include "CameraCustomizer.h"
+#include "Common.h"
 
 void CameraCustomizer::updateImage() {
-	cv::Vec3f topColor(2, 1, 1);
-	cv::Vec3f bottomColor(240, 120, 120);
-	float delta = 1.0f / img.rows;
-	float coeff = 0.0f;
+	cv::Vec3b topColor(2, 1, 1);
+	cv::Vec3b bottomColor(240, 120, 120);
+	double delta = 1.0 / img.rows;
+	double coeff = 0.0;
 	for (int i = 0; i < img.rows; ++i, coeff += delta) {
-		cv::Vec3f color = bottomColor*coeff + topColor*(1.0f - coeff);
 		for (int j = 0; j < img.cols; ++j) {
-			img.at<cv::Vec3b>(i, j) = cv::Vec3b((uchar)color[0], (uchar)color[1], (uchar)color[2]);
+			img.at<cv::Vec3b>(i, j) = interpolate(topColor, bottomColor, coeff);
 		}
 	}
 	for (int i = 0; i < 2; ++i) {
