@@ -1,7 +1,7 @@
 # SfmDataGenerator
 [Русская версия](README_RU.md)
 ## Overview
-SfmDataGenerator is a software for generating realistic *Structure-from-Motion* (*SfM*) datasets. The dataset is being created by moving virtual camera around a 3D-model and taking photos from different viewpoints. A 3D-model is presented in [PLY](http://graphics.stanford.edu/data/3Dscanrep/#file_format) format. Virtual camera is fully consistent with the *pinhole camera* model.
+SfmDataGenerator is a software for generating realistic *Structure-from-Motion* (*SfM*) datasets. The dataset is being created by moving virtual camera around a 3D-model and taking photos from different viewpoints. A 3D-model is presented in [PLY](http://paulbourke.net/dataformats/ply/) format. Virtual camera is fully consistent with the *pinhole camera* model.
 
 SfmDataGenerator allows you to
  * Avoid resource-intensive feature detection and feature matching
