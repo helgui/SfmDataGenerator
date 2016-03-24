@@ -1,4 +1,5 @@
 # SfmDataGenerator
+[English version](README.md)
 ## Обзор
 **SfmDataGenerator** - программный инструмент, позволяющий создавать реалистичные наборы данных для задачи разреженной реконструкции (*Struture from Motion, SfM*). Набор данных формируется
 в процессе виртуальной съемки 3D-модели, представленной в формате [PLY](http://graphics.stanford.edu/data/3Dscanrep/#file_format), с использованием модели проективной камеры (*pinhole camera*).
