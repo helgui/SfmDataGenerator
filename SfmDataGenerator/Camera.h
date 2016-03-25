@@ -52,6 +52,8 @@ public:
 	cv::Matx33d K;
 	/*Radial distortion coefficients*/
 	double k1, k2;
+private:
+	void distort(double &x, double &y) const;
 };
 
 /*Serialization interface*/

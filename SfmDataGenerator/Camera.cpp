@@ -7,13 +7,18 @@
 
 using namespace std;
 
+void Camera::distort(double &x, double &y) const {
+	double r2 = x*x + y*y;
+	double distMult = 1.0 + k1*r2 + k2*r2*r2;
+	x *= distMult;
+	y *= distMult;
+}
+
 cv::Point2d Camera::projectPoint(const cv::Point3d & pnt) const {
 	auto p = toCameraCoords(pnt);
 	p.x /= p.z;
 	p.y /= p.z;
-	double r2 = p.x*p.x + p.y*p.y;
-	p.x *= (1.0 + k1*r2 + k2*r2*r2);
-	p.y *= (1.0 + k1*r2 + k2*r2*r2);
+	distort(p.x, p.y);
 	return cv::Point2d(K(0, 0)*p.x + K(0, 2), K(1, 1)*p.y + K(1, 2));
 }
 
