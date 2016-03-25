@@ -52,6 +52,6 @@ void GenHelper::takePhoto() {
 	ostringstream os;
 	counter++;
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
-	viz.saveScreenshot(os.str());
+	imwrite(os.str(), viz.getScreenshot());
 	sfmData.addView(cam, view, os.str());
 }

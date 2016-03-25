@@ -16,7 +16,7 @@ void Slider::updateButtonPos() {
 }
 
 void Slider::draw(cv::Mat &img, const cv::Scalar &buttonColor) const {
-	img(track).setTo(valueToColor((val - min)/(max - min)));
+	img(track).setTo(valueToColor((val - min) / (max - min)));
 	cv::Rect rem(track);
 	rem.x += (int)((val - min) / scale + 1e-3);
 	rem.width -= rem.x - track.x;

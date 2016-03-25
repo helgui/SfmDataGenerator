@@ -2,6 +2,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include "stdafx.h"
+#include "Camera.h"
 
 #define btw(v, a, b) ((v >= a) && (v < b))
 /*
@@ -97,11 +98,10 @@ static void writeMatx(std::ostream & os, const cv::Matx<Tp, m, n> & mat) {
 		os << mat.val[i] << ' ';
 }
 
-/*Two colors interpolation*/
+/*Two colors linear interpolation*/
 static inline
 cv::Vec3b interpolate(const cv::Vec3b & col1, const cv::Vec3b & col2, double value) {
-	cv::Vec3d avg = (1.0 - value)*col1 + value*col2;
-	return cv::Vec3b((uchar)avg[0], (uchar)avg[1], (uchar)avg[2]);
+	return (1.0 - value)*col1 + value*col2;
 }
 
 /*Maps value in the range [0; 1] to color in the range [blue; red]*/
@@ -113,11 +113,11 @@ cv::Vec3b valueToColor(double value) {
 		return interpolate({255, 0, 0}, {255, 255, 0}, 4.0*value);
 	}
 	if (value <= 0.5) {
-		return interpolate({ 255, 255, 0 }, {0, 255, 0}, 4.0*value - 1.0);
+		return interpolate({255, 255, 0}, {0, 255, 0}, 4.0*value - 1.0);
 	}
 	if (value <= 0.75) {
-		return interpolate({ 0, 255, 0 }, { 0, 255, 255 }, 4.0*value - 2.0);
+		return interpolate({0, 255, 0}, {0, 255, 255}, 4.0*value - 2.0);
 	}
-	return interpolate({ 0, 255, 255 }, { 0, 0, 255 }, 4.0*value - 3.0);
+	return interpolate({0, 255, 255}, {0, 0, 255}, 4.0*value - 3.0);
 }
 #endif

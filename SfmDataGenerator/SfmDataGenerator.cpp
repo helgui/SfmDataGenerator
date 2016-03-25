@@ -83,8 +83,7 @@ int main(int argc, char *argv[]) {
 			if (parser.has("i2")) {
 				i1 = parser.get<int>("i1");
 				i2 = parser.get<int>("i2");
-			}
-			else {
+			} else {
 				if (parser.has("i1")) i1 = parser.get<int>("i1");
 			}
 			if (!parser.check()) {

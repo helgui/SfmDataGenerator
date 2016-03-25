@@ -1,7 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 #include "stdafx.h"
-#include "Common.h"
 
 class Camera {
 public:
