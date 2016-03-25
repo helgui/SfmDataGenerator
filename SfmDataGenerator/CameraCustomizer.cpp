@@ -1,3 +1,7 @@
+/*
+	Copyright (c) 2016 Oleg Yakovlev
+	This file is a part of SfmDataGenerator software
+*/
 #include "stdafx.h"
 #include "CameraCustomizer.h"
 #include "Common.h"

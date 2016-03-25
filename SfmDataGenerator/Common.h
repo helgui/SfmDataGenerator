@@ -1,3 +1,7 @@
+/*
+	Copyright (c) 2016 Oleg Yakovlev
+	This file is a part of SfmDataGenerator software
+*/
 #pragma once
 #ifndef COMMON_H
 #define COMMON_H

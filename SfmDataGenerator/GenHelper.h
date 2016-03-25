@@ -1,3 +1,7 @@
+/*
+	Copyright (c) 2016 Oleg Yakovlev
+	This file is a part of SfmDataGenerator software
+*/
 #ifndef GEN_HELPER_H
 #define GEN_HELPER_H
 #include "stdafx.h"

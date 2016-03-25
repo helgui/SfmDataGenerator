@@ -1,3 +1,7 @@
+/*
+	Copyright (c) 2016 Oleg Yakovlev
+	This file is a part of SfmDataGenerator software
+*/
 #ifndef CAMERA_CUSTOMIZER_H
 #define CAMERA_CUSTOMIZER_H
 #include "stdafx.h"

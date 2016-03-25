@@ -1,3 +1,7 @@
+/*
+	Copyright (c) 2016 Oleg Yakovlev
+	This file is a part of SfmDataGenerator software
+*/
 #ifndef SFM_DATA_H
 #define SFM_DATA_H
 #include "stdafx.h"
