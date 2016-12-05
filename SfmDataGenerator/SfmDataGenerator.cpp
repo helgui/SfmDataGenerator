@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
-	string cmd = parser.get<string>("@cmd", true);
+	string cmd = toLower(parser.get<string>("@cmd", true));
 	if (!parser.check()) {
 		parser.printErrors();
 		return 0;
@@ -199,7 +199,7 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 		cerr << "Can't create output folder";
 		return;
 	}
-
+	
 	while (!viz.wasStopped()) {
 		helper.showCameraParams();
 		viz.spinOnce(300, true);
