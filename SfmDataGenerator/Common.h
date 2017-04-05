@@ -111,8 +111,8 @@ cv::Vec3b interpolate(const cv::Vec3b & col1, const cv::Vec3b & col2, double val
 /*Maps value in the range [0; 1] to color in the range [blue; red]*/
 static inline
 cv::Vec3b valueToColor(double value) {
-	if (!btw(value, 0.0, 1.0))
-		return cv::Vec3b(0, 0, 0);
+	if (value < -1.0) value = -1.0;
+	if (value > 1.0) value = 1.0;
 	if (value <= 0.25) {
 		return interpolate({255, 0, 0}, {255, 255, 0}, 4.0*value);
 	}

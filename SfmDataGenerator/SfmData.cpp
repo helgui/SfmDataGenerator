@@ -23,7 +23,7 @@ void SfmData::addView(const Camera &cam, const View &view, const string &imgFile
 	}
 	views.push_back(view);
 	cameras.push_back(cam);
-	images.push_back(imgFile);
+	images.push_back(std::experimental::filesystem::absolute(imgFile).string());
 }
 
 void SfmData::fillCloud(const Mat & mat) {
@@ -198,11 +198,13 @@ void SfmData::show() const {
 	Mat pts(maxIdx + 1, 1, CV_64FC3);
 	for (int i = 0; i <= maxIdx; ++i)
 		pts.at<Vec3d>(i) = cloud[i];
-	viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
+	if (!pts.empty())
+		viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
 	for (int i = 0; i < (int)views.size(); ++i) {
 		double sz = 1e10;
+		if (views[i].empty()) sz = 1.0;
 		for (const Observation& obs : views[i]) {
-			auto pnt = cameras[i].pose()*cloud[obs.d];
+			auto pnt = cameras[i].toCameraCoords(cloud[obs.d]);
 			sz = min(sz, fabs(pnt.z / 10.0));
 		}
 		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());

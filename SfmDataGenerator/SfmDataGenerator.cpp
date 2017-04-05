@@ -27,7 +27,8 @@ const string keys =
 "{ratio          |0.2   | Ratio of false matches}"
 "{format         |txt   | Output file format    }"
 "{i1             |<none>| First view index      }"
-"{i2             |<none>| Second view index     }";
+"{i2             |<none>| Second view index     }"
+"{mode           |sfm   | Mode (for `generate`) }";
 
 //Supported commands
 enum Command {
@@ -38,6 +39,18 @@ enum Command {
 	HELP,
 	CONVERT
 };
+
+enum Mode {
+	SFM,
+	SILHOUETTE
+};
+
+inline Mode modeFromString(const string &str) {
+	auto lower = toLower(str);
+	if (lower == "sil")
+		return Mode::SILHOUETTE;
+	return Mode::SFM;
+}
 
 //Command aliases
 const map<string, Command> aliasOf = {
@@ -60,7 +73,7 @@ const map<string, Command> aliasOf = {
 	{ "false-observations",	Command::FALSE_OBS}
 };
 
-void genDataset(const string &inFile, const string &outDir, const string &outFile);
+void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode);
 
 int main(int argc, char *argv[]) {
 	CommandLineParser parser(argc, argv, keys);
@@ -81,6 +94,7 @@ int main(int argc, char *argv[]) {
 			parser.printMessage();
 			return 0;
 		}
+
 		case Command::VIEW: {
 			string inFile = parser.get<string>("in", false);
 			int i1 = -1, i2 = -1;
@@ -106,10 +120,15 @@ int main(int argc, char *argv[]) {
 			sfmData.show(cout);
 			return 0;
 		}
+
 		case Command::GENERATE: {
 			string inFile = parser.get<string>("in", false);
 			string outDir = parser.get<string>("out", false);
 			string format = parser.get<string>("format", true);
+			string modeRaw = parser.get<string>("mode", true);
+			Mode mode;
+			if (modeRaw == "sil")
+				mode = Mode::SILHOUETTE;
 			if (format != "xml" && format != "yml" && format != "txt") {
 				cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
 				format = "txt";
@@ -118,9 +137,10 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format);
+			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format, mode);
 			return 0;
 		}
+
 		case Command::NOISE_PTS: {
 			string inFile = parser.get<string>("in", false);
 			string outFile = parser.get<string>("out", false);
@@ -134,6 +154,7 @@ int main(int argc, char *argv[]) {
 			sfmData.save(outFile);
 			return 0;
 		}
+
 		case Command::FALSE_OBS: {
 			string inFile = parser.get<string>("in", false);
 			string outFile = parser.get<string>("out", false);
@@ -155,6 +176,7 @@ int main(int argc, char *argv[]) {
 			sfmData.save(outFile);
 			return 0;
 		}
+
 		case Command::CONVERT: {
 			string inFile = parser.get<string>("in", false);
 			string outFile = parser.get<string>("out", false);
@@ -170,23 +192,32 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-void genDataset(const string &inFile, const string &outDir, const string & outFile) {
+void genDataset(const string &inFile, const string &outDir, const string & outFile, Mode mode) {
 	SfmData sfmData;
 	viz::Viz3d viz("Virtual camera");
 	viz::Camera cam = viz.getCamera();
 	viz::Mesh mesh = viz::readMesh(inFile);
 	viz.showWidget("mesh", viz::WMesh(mesh));
-	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder);
+	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode == Mode::SILHOUETTE);
 	viz.registerKeyboardCallback([](const viz::KeyboardEvent &event, void * cookie) -> void {
-		if (event.action != viz::KeyboardEvent::KEY_UP)
-			return;
 		GenHelper * helper = (GenHelper *)cookie;
+		if (event.action == viz::KeyboardEvent::KEY_DOWN) {
+			if (event.symbol == "z") {
+				helper->showCameraParams();
+			}
+			return;
+		}
+
 		if (event.symbol == "space") {
 			helper->takePhoto();
 			return;
 		}
-		if (tolower(event.symbol[0]) == 'm') {
+		if (event.symbol == "m") {
 			helper->changeCameraParams();
+			return;
+		}
+		if (event.symbol == "z") {
+			helper->hideCameraParams();
 			return;
 		}
 	}, &helper);
@@ -201,9 +232,10 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 	}
 	
 	while (!viz.wasStopped()) {
-		helper.showCameraParams();
+		//helper.showCameraParams();
 		viz.spinOnce(300, true);
 	}
-	sfmData.fillCloud(mesh.cloud);
+	if (mode == Mode::SFM)
+		sfmData.fillCloud(mesh.cloud);
 	sfmData.save(outFile);
 }

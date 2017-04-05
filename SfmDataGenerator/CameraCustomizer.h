@@ -69,14 +69,14 @@ public:
 		cv::destroyWindow(winName);
 		changing = 0;
 	}
-	void change();
 	double k1() const;
 	double k2() const;
 private:
 	enum ConstParams {
 		SLIDER_WIDTH = 400,
 		SLIDER_HEIGHT = 70,
-		SLIDER_OFFSET = 50
+		SLIDER_OFFSET = 50,
+		GRID_STEP = 10
 	};
 	void updateImage();
 	cv::Mat img;
