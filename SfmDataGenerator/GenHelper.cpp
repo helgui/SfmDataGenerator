@@ -8,9 +8,9 @@
 using namespace std;
 using namespace cv;
 
-GenHelper::GenHelper(viz::Viz3d &viz, Mat &cloud, SfmData &sfmData, const string& imgFolder, bool silhouette) :
-	viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder), camParams("Lens distortion"), silhouette(silhouette){
-	//viz.showWidget("title", viz::WText("Camera parameters: ", Point(10, 120), 15, viz::Color::white()));
+GenHelper::GenHelper(viz::Viz3d &viz, Mat &cloud, SfmData &sfmData, const string& imgFolder, Mode mode) :
+	viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder), camParams("Lens distortion"), mode(mode),
+	camParamsDisplay(0), progressDisplay(0){
 }
 
 Point3d GenHelper::getPoint(int idx) const {
@@ -28,6 +28,7 @@ void GenHelper::changeCameraParams() {
 }
 
 void GenHelper::showCameraParams() {
+	camParamsDisplay = 1;
 	viz.showWidget("title", viz::WText("Camera parameters: ", Point(10, 120), 15, viz::Color::white()));
 	viz.showWidget("focalx", viz::WText("Focal length (X): " + to_string(viz.getCamera().getFocalLength()[0]), Point(10, 100), 15, viz::Color::white()));
 	viz.showWidget("focaly", viz::WText("Focal length (Y): " + to_string(viz.getCamera().getFocalLength()[1]), Point(10, 80), 15, viz::Color::white()));
@@ -38,18 +39,23 @@ void GenHelper::showCameraParams() {
 }
 
 void GenHelper::hideCameraParams() {
+	if (!camParamsDisplay) return;
 	viz.removeWidget("title");
 	viz.removeWidget("focalx");
 	viz.removeWidget("focaly");
 	viz.removeWidget("k1");
 	viz.removeWidget("k2");
 	viz.removeWidget("imgsize");
+	camParamsDisplay = 0;
 }
 
 void GenHelper::takePhoto() {
-	if (silhouette) {
+	if (mode == Mode::SILHOUETTE) {
 		takeSilhouette();
 		return;
+	}
+	if (mode == Mode::DEPTH) {
+		takeDepth();
 	}
 	takeUsualPhoto();
 }
@@ -82,9 +88,9 @@ void GenHelper::takeUsualPhoto() {
 
 void GenHelper::takeSilhouette() {
 	Size ws = viz.getCamera().getWindowSize();
-	Camera cam(viz, camParams.k1(), camParams.k2());
+	Camera cam(viz, 0.0, 0.0);
 	vector<Observation> view;
-	auto screen = viz.getScreenshot();
+	Mat screen(ws, CV_8UC3);
 	for (int i = 0; i < ws.height; ++i) {
 		for (int j = 0; j < ws.width; ++j) {
 			if (viz.getDepth(Point(j, ws.height - i - 1)) == 1.0) {
@@ -100,4 +106,38 @@ void GenHelper::takeSilhouette() {
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
 	imwrite(os.str(), screen);
 	sfmData.addView(cam, view, os.str());
+}
+
+void GenHelper::showProgress() {
+	progressDisplay = 1;
+	viz.showWidget("progress", viz::WText("Processing...", Point(10, 20), 15, viz::Color::white()));
+}
+
+void GenHelper::hideProgress() {
+	if (!progressDisplay) return;
+	viz.removeWidget("progress");
+	
+}
+
+void GenHelper::takeDepth() {
+	Size ws = viz.getCamera().getWindowSize();
+	Camera cam(viz, 0.0, 0.0);
+	Vec2d clip = viz.getCamera().getClip();
+	Mat1f depth = Mat1f::zeros(ws);
+	View view;
+	showProgress();
+	viz.spinOnce(1, false);
+	for (int i = 0; i < ws.height; ++i) {
+		for (int j = 0; j < ws.width; ++j) {
+			double d = viz.getDepth(Point(j, i));
+			if (d == 1.0) continue;
+			depth(ws.height - i - 1, j) = float(clip[0] + (clip[1] - clip[0])*d);
+		}
+	}
+	ostringstream os;
+	++counter;
+	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".exr";
+	imwrite(os.str(), depth);
+	sfmData.addView(cam, view, os.str());
+	hideProgress();
 }

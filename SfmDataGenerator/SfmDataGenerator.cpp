@@ -40,15 +40,12 @@ enum Command {
 	CONVERT
 };
 
-enum Mode {
-	SFM,
-	SILHOUETTE
-};
-
 inline Mode modeFromString(const string &str) {
 	auto lower = toLower(str);
 	if (lower == "sil")
 		return Mode::SILHOUETTE;
+	if (lower == "dep")
+		return Mode::DEPTH;
 	return Mode::SFM;
 }
 
@@ -125,10 +122,7 @@ int main(int argc, char *argv[]) {
 			string inFile = parser.get<string>("in", false);
 			string outDir = parser.get<string>("out", false);
 			string format = parser.get<string>("format", true);
-			string modeRaw = parser.get<string>("mode", true);
-			Mode mode;
-			if (modeRaw == "sil")
-				mode = Mode::SILHOUETTE;
+			Mode mode = modeFromString(parser.get<string>("mode", true));
 			if (format != "xml" && format != "yml" && format != "txt") {
 				cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
 				format = "txt";
@@ -198,7 +192,7 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 	viz::Camera cam = viz.getCamera();
 	viz::Mesh mesh = viz::readMesh(inFile);
 	viz.showWidget("mesh", viz::WMesh(mesh));
-	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode == Mode::SILHOUETTE);
+	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode);
 	viz.registerKeyboardCallback([](const viz::KeyboardEvent &event, void * cookie) -> void {
 		GenHelper * helper = (GenHelper *)cookie;
 		if (event.action == viz::KeyboardEvent::KEY_DOWN) {
