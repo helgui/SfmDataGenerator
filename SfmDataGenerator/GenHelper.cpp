@@ -56,6 +56,7 @@ void GenHelper::takePhoto() {
 	}
 	if (mode == Mode::DEPTH) {
 		takeDepth();
+		return;
 	}
 	takeUsualPhoto();
 }
@@ -125,13 +126,15 @@ void GenHelper::takeDepth() {
 	Vec2d clip = viz.getCamera().getClip();
 	Mat1f depth = Mat1f::zeros(ws);
 	View view;
-	showProgress();
-	viz.spinOnce(1, false);
+	//showProgress();
+	//viz.spinOnce(1, false);
 	for (int i = 0; i < ws.height; ++i) {
 		for (int j = 0; j < ws.width; ++j) {
 			double d = viz.getDepth(Point(j, i));
 			if (d == 1.0) continue;
-			depth(ws.height - i - 1, j) = float(clip[0] + (clip[1] - clip[0])*d);
+			double depthSample = 2.0 * d - 1.0;
+			d = 2.0*d - 1.0;
+			depth(ws.height - i - 1, j) = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - depthSample * (clip[1] - clip[0])));
 		}
 	}
 	ostringstream os;
@@ -139,5 +142,5 @@ void GenHelper::takeDepth() {
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".exr";
 	imwrite(os.str(), depth);
 	sfmData.addView(cam, view, os.str());
-	hideProgress();
+	//hideProgress();
 }
