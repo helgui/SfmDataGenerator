@@ -78,6 +78,8 @@ private:
 		SLIDER_OFFSET = 50,
 		GRID_STEP = 10
 	};
+	std::vector<std::vector<cv::Point2f>> grid;
+	std::vector<std::vector<float>> gridNorm;
 	void updateImage();
 	cv::Mat img;
 	Slider slider[2];

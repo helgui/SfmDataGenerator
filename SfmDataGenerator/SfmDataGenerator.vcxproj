@@ -150,6 +150,7 @@
     <ClInclude Include="CameraCustomizer.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="GenHelper.h" />
+    <ClInclude Include="MotionScripts.h" />
     <ClInclude Include="SfmData.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Slider.h" />

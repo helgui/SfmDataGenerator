@@ -35,6 +35,9 @@
     <ClInclude Include="CameraCustomizer.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="MotionScripts.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
