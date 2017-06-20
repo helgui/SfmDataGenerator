@@ -23,18 +23,20 @@ void CameraCustomizer::updateImage() {
 
 	Point2f offset(0.5f*img.cols, 0.75f*img.rows);
 
-	for (int i = 1; i < (int)grid.size(); ++i) {
-		for (int j = 1; j < (int)grid[i].size(); ++j) {
+	for (int i = 0; i < (int)grid.size(); ++i) {
+		for (int j = 0; j < (int)grid[i].size(); ++j) {
 			const float& r1 = gridNorm[i][j];
-			const float& r2 = gridNorm[i - 1][j];
-			const float& r3 = gridNorm[i][j - 1];
-			
 			float m1 = 1.0f + k1()*r1*r1 + k2()*pow(r1, 4.0f);
-			float m2 = 1.0f + k1()*r2*r2 + k2()*pow(r2, 4.0f);
-			float m3 = 1.0f + k1()*r3*r3 + k2()*pow(r3, 4.0f);
-
-			line(img, grid[i][j]*m1 + offset, grid[i-1][j]*m2 + offset, cv::Scalar(255, 255, 255));
-			line(img, grid[i][j]*m1 + offset, grid[i][j-1]*m3 + offset, cv::Scalar(255, 255, 255));
+			if (i) {
+				const float& r2 = gridNorm[i - 1][j];
+				float m2 = 1.0f + k1()*r2*r2 + k2()*pow(r2, 4.0f);
+				line(img, grid[i][j] * m1 + offset, grid[i - 1][j] * m2 + offset, cv::Scalar(255, 255, 255));
+			}
+			if (j) {
+				const float& r3 = gridNorm[i][j - 1];
+				float m3 = 1.0f + k1()*r3*r3 + k2()*pow(r3, 4.0f);
+				line(img, grid[i][j] * m1 + offset, grid[i][j - 1] * m3 + offset, cv::Scalar(255, 255, 255));
+			}
 		}
 	}
 	cv::putText(img, "K1:", cv::Point(10, SLIDER_HEIGHT / 2 + Slider::TRACK_HEIGHT / 2), cv::FONT_HERSHEY_PLAIN, 1.5, cv::Scalar(255, 255, 255), 2);
@@ -53,11 +55,11 @@ CameraCustomizer::CameraCustomizer(const std::string &winName)
 		rect[i].x = SLIDER_OFFSET;
 		rect[i].y = i*SLIDER_HEIGHT;
 	}
-	for (float y = -0.5f; y <= 0.5f; y += 0.1) {
+	for (float y = -0.5f; y <= 0.5f; y += 0.1f) {
 		grid.emplace_back();
 		gridNorm.emplace_back();
-		for (float x = -0.5f; x <= 0.5f; x += 0.1) {
-			grid.back().emplace_back(x*0.5f*img.cols, y*0.25f*img.rows);
+		for (float x = -0.5f; x <= 0.5f; x += 0.05f) {
+			grid.back().emplace_back(1.8f*x*0.5f*img.cols, 1.8f*y*0.25f*img.rows);
 			gridNorm.back().push_back(x*x + y*y);
 		}
 	}
