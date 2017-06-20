@@ -75,8 +75,7 @@ private:
 	enum ConstParams {
 		SLIDER_WIDTH = 400,
 		SLIDER_HEIGHT = 70,
-		SLIDER_OFFSET = 50,
-		GRID_STEP = 10
+		SLIDER_OFFSET = 50
 	};
 	std::vector<std::vector<cv::Point2f>> grid;
 	std::vector<std::vector<float>> gridNorm;

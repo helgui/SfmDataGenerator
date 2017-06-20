@@ -77,13 +77,28 @@ void GenHelper::takeUsualPhoto() {
 		if (winCoords.x < 0 || winCoords.y < 0 || winCoords.x > ws.width || winCoords.y > ws.height) continue;
 
 		//Depth testing
-		if (winCoords.z > viz.getDepth(Point((int)round(winCoords.x), (int)round(winCoords.y)))) continue;
+		if (winCoords.z - viz.getDepth(Point((int)round(winCoords.x), (int)round(winCoords.y))) > 1e-4) continue;
 		view.emplace_back(i, cam.projectPoint(pnt));
 	}
+	Mat img = viz.getScreenshot();
 	ostringstream os;
 	counter++;
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
-	imwrite(os.str(), viz.getScreenshot());
+	Mat undist;
+	vector<Vec2f> dist;
+	cerr << "collect" << endl;
+	for (int i = 0; i < img.rows; ++i) {
+		for (int j = 0; j < img.cols; ++j) {
+			dist.emplace_back((float)j, (float)i);
+		}
+	}
+	cerr << "undistort" << endl;
+	undistortPoints(dist, undist, cam.K, vector<double>{ cam.k1, cam.k2, 0.0, 0.0 }, noArray(), cam.K);
+	undist = undist.reshape(0, img.rows);
+	Mat newImg;
+	cerr << "map" << endl;
+	remap(img, newImg, undist, noArray(), INTER_LINEAR, BORDER_REPLICATE);
+	imwrite(os.str(), newImg);
 	sfmData.addView(cam, view, os.str());
 }
 

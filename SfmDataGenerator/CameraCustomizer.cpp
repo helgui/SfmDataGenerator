@@ -43,8 +43,8 @@ void CameraCustomizer::updateImage() {
 
 CameraCustomizer::CameraCustomizer(const std::string &winName)
 	: winName(winName), control(-1), changing(0), slider{
-		{ -0.25, 0.25, 0, SLIDER_WIDTH, SLIDER_HEIGHT },
-		{ -0.25, 0.25, 0, SLIDER_WIDTH, SLIDER_HEIGHT } },
+		{ -0.5, 0.5, 0, SLIDER_WIDTH, SLIDER_HEIGHT },
+		{ -0.5, 0.5, 0, SLIDER_WIDTH, SLIDER_HEIGHT } },
 	img(SLIDER_HEIGHT * 4 /*SLIDER_OFFSET + Slider::width(SLIDER_WIDTH)*/,
 		SLIDER_OFFSET + Slider::width(SLIDER_WIDTH), CV_8UC3), grid() {
 	for (int i = 0; i < 2; ++i) {
@@ -53,10 +53,10 @@ CameraCustomizer::CameraCustomizer(const std::string &winName)
 		rect[i].x = SLIDER_OFFSET;
 		rect[i].y = i*SLIDER_HEIGHT;
 	}
-	for (float y = -1.0f; y <= 1.0f; y += 0.2) {
+	for (float y = -0.5f; y <= 0.5f; y += 0.1) {
 		grid.emplace_back();
 		gridNorm.emplace_back();
-		for (float x = -1.0f; x <= 1.0f; x += 0.1) {
+		for (float x = -0.5f; x <= 0.5f; x += 0.1) {
 			grid.back().emplace_back(x*0.5f*img.cols, y*0.25f*img.rows);
 			gridNorm.back().push_back(x*x + y*y);
 		}

@@ -124,4 +124,17 @@ cv::Vec3b valueToColor(double value) {
 	}
 	return interpolate({0, 255, 255}, {0, 0, 255}, 4.0*value - 3.0);
 }
+
+template<class T>
+void centralize(cv::Mat &points) {
+	T centroid(0, 0, 0);
+	for (auto it = points.begin<T>(); it != points.end<T>(); ++it) {
+		centroid += *it;
+	}
+	centroid *= 1.0/points.total();
+	for (auto it = points.begin<T>(); it != points.end<T>(); ++it) {
+		*it -= centroid;
+	}
+	cv::normalize(points, points, -0.5, 0.5, cv::NORM_MINMAX);
+}
 #endif

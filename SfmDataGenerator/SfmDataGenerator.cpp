@@ -191,7 +191,14 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 	viz::Viz3d viz("Virtual camera");
 	viz::Camera cam = viz.getCamera();
 	viz::Mesh mesh = viz::readMesh(inFile);
+	if (mesh.cloud.type() == CV_32FC3) {
+		centralize<Vec3f>(mesh.cloud);
+	}
+	if (mesh.cloud.type() == CV_64FC3) {
+		centralize<Vec3d>(mesh.cloud);
+	}
 	viz.showWidget("mesh", viz::WMesh(mesh));
+	viz.setRenderingProperty("mesh", viz::SHADING, viz::SHADING_PHONG);
 	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode);
 	viz.registerKeyboardCallback([](const viz::KeyboardEvent &event, void * cookie) -> void {
 		GenHelper * helper = (GenHelper *)cookie;
