@@ -54,9 +54,9 @@ view -in=<sfm-data> [-i1=<first-idx>] [-i2=<second-idx>]
 
 | Parameter    | Description          |
 |--------------|----------------------|
-| <sfm-data>   | Path to sfmData file |
-| <first-idx>  | First image index    |
-| <second-idx> | Second image index   |
+| `<sfm-data>`   | Path to sfmData file |
+| `<first-idx>`  | First image index    |
+| `<second-idx>` | Second image index   |
 
 Effect of `view` depends on parameters passed as well as type of dataset. 
 
@@ -80,8 +80,8 @@ conv -in=<input> -out=<output>
 
 | Parameter | Description         |
 |-----------|---------------------|
-| <input>   | Input sfmData file  |
-| <output>  | Output sfmData file |
+| `<input>`   | Input sfmData file  |
+| `<output>`  | Output sfmData file |
 
 
 # Output formats
