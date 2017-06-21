@@ -148,8 +148,6 @@ void GenHelper::takeDepth() {
 	Vec2d clip = viz.getCamera().getClip();
 	Mat1f depth = Mat1f::zeros(ws);
 	View view;
-	//showProgress();
-	//viz.spinOnce(1, false);
 	for (int i = 0; i < ws.height; ++i) {
 		for (int j = 0; j < ws.width; ++j) {
 			double d = viz.getDepth(Point(j, i));
@@ -162,8 +160,8 @@ void GenHelper::takeDepth() {
 	}
 	ostringstream os;
 	++counter;
-	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".exr";
-	imwrite(os.str(), depth);
+	os << imgFolder << "/" << setw(6) << setfill('0') << counter;
+	imwrite(os.str() + ".exr", depth);
+	imwrite(os.str() + ".png", viz.getScreenshot()); //rgb image
 	sfmData.addView(cam, view, os.str());
-	//hideProgress();
 }

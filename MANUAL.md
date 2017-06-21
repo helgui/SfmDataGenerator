@@ -1,5 +1,6 @@
 # Contents
  * [Usage](#usage)
+ * [Commands](#commands)
  * [Output formats](#output-formats)
 
 # Usage
@@ -7,12 +8,23 @@
 SfmDataGenerator <command> -<param1>=<value1> -<param2>=<value2> ... <param_n>=<value_n>
 ```
 Where `<command>` is one of:
+ - [help, (h, ?)](#help)
  - [generate (gen, g)](#generate)
- - view (v)
+ - [view (v)](#view)
+ - [convert (conv, c)](#convert)
 
 In the following commands description `SfmDataGenerator` is omitted
 
 # Commands
+## help
+*Aliases: h, ?*
+
+Show help
+
+Usage:
+```
+help
+```
 ## generate
 *Aliases: gen, g*
 
@@ -20,19 +32,64 @@ Run dataset generation
 
 Usage:
 ```
-gen -in=<input-ply> -out=<out-dir> -format=<fmt> -mode=<mode>
+gen -in=<input-ply> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
 ```
-| Parameter     | Description                                      | Values        |
-|---------------|--------------------------------------------------|---------------|
-| `<input-ply>` | Path to input PLY model                          |               |
-| `<out-dir>`   | Output directory                                 |               |
-| `<fmt>`       | Format of dataset                                | txt, xml, yml |
-| `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil |
+
+| Parameter     | Description                                      | Values        | Default |
+|---------------|--------------------------------------------------|---------------|---------|
+| `<input-ply>`| Path to input PLY model                          |               |		 |
+| `<out-dir>`  | Output directory                                 |               |			 |
+| `<fmt>`       | Format of dataset                                | txt, xml, yml | txt	 |
+| `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil | sfm     |
+
+## view
+*Alias: v*
+
+View generated dataset 
+
+Usage:
+```
+view -in=<sfm-data> [-i1=<first-idx>] [-i2=<second-idx>]
+```
+
+| Parameter    | Description          |
+|--------------|----------------------|
+| <sfm-data>   | Path to sfmData file |
+| <first-idx>  | First image index    |
+| <second-idx> | Second image index   |
+
+Effect of `view` depends on parameters passed as well as type of dataset. 
+
+| Dataset type | i1 | i2 | Effect                                        |
+|--------------|----|----|-----------------------------------------------|
+| SfM          | -  | -  | View point cloud & camera poses               |
+| SfM          | +  | -  | View features of (i1)-th image                |
+| SfM          | +  | +  | View matches between (i1)-th & (i2)-th images |
+| RGB-D & Sil  | -  | -  | View camera poses                             |
+| RGB-D & Sil  | +  | -  | View (i1)-th depth (or silhouette) image      |
+
+## convert
+*Aliases: conv, c*
+
+Convert dataset from one format to another. It uses file extension to determine format.
+
+Usage:
+```
+conv -in=<input> -out=<output>
+``` 
+
+| Parameter | Description         |
+|-----------|---------------------|
+| <input>   | Input sfmData file  |
+| <output>  | Output sfmData file |
+
 
 # Output formats
 ## Output folder structure
 ### For SfM and Silhouette datasets
 ```
+output_dir
+|
 |--images
 |  |--000001.png
 |  |--000002.png
@@ -41,6 +98,8 @@ gen -in=<input-ply> -out=<out-dir> -format=<fmt> -mode=<mode>
 ```
 ### For RGB-D Datasets
 ```
+output_dir
+|
 |--images
 |  |--000001.exr (depth floating point image in OpenEXR)
 |  |--000001.png (corresponding RGB image)
@@ -70,7 +129,7 @@ gen -in=<input-ply> -out=<out-dir> -format=<fmt> -mode=<mode>
 <X_1> <Y_1> <Z_1>
 ...
 ```
-**Note: for silhouette & RGB-D datasets `<nPoints>`, `<nPointsOnImage>` are zeros**
+**Note: for silhouette & RGB-D datasets `<nPoints>`, `<nPointsOnImage>` are zeros, i.e. only camera intrinsics & extrinsics are presented**
 
 ### .yml
 ```yaml
