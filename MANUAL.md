@@ -1,6 +1,7 @@
 # Contents
  * [Usage](#usage)
  * [Commands](#commands)
+ * [Controls](#controls)
  * [Output formats](#output-formats)
 
 # Usage
@@ -12,6 +13,8 @@ Where `<command>` is one of:
  - [generate (gen, g)](#generate)
  - [view (v)](#view)
  - [convert (conv, c)](#convert)
+ - [noise-proj (np, n)](#noise-proj)
+ - [false-proj (fp, f)](#false-proj)
 
 In the following commands description `SfmDataGenerator` is omitted
 
@@ -83,7 +86,48 @@ conv -in=<input> -out=<output>
 | `<input>`   | Input sfmData file  |
 | `<output>`  | Output sfmData file |
 
+## noise-proj
+**Note: only for SfM datasets**
 
+*Aliases: np, n*
+
+Add gaussian noise to each projection coordinates
+
+Usage:
+```
+np -in=<input> -out=<output> [-stdev=<stdev>]
+```
+
+| Parameter | Description                                       | Default |
+|-----------|---------------------------------------------------|---------|
+| `<input>`   | Input sfmData file                                |         |
+| `<output>`  | File to save noisy dataset                        |         |
+| `<stdev>`   | Strandard deviation of gaussian noise (in pixels) | 0.03    |
+
+## false-proj
+**Note: only for SfM datasets**
+
+*Aliases: fp, f*
+
+Add wrong point-projection correspondences. It emulates a real feature matching.
+
+Usage:
+```
+fp -in=<input> -out=<output> [-ratio=<ratio>] [-count=<count>]
+```
+
+| Parameter | Description                     | Default |
+|-----------|---------------------------------|---------|
+| `<input>`   | Input sfmData file              |         |
+| `<output>`  | File to save noisy dataset      |         |
+| `<ratio>`   | Ratio of wrong correspondences  | 0.2     |
+| `<count>`   | Number of wrong correspondences | 50      |
+
+If `<ratio>` and `<count>` are both given, `<ratio>` has priority.
+
+#Controls
+
+			 
 # Output formats
 ## Output folder structure
 ### For SfM and Silhouette datasets

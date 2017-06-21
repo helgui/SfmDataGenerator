@@ -61,13 +61,13 @@ const map<string, Command> aliasOf = {
 	{ "help",				Command::HELP},
 	{ "n",					Command::NOISE_PTS},
 	{ "np",					Command::NOISE_PTS},
-	{ "noise-points",		Command::NOISE_PTS},
+	{ "noise-proj",			Command::NOISE_PTS},
 	{ "c",					Command::CONVERT},
 	{ "conv",				Command::CONVERT},
 	{ "convert",			Command::CONVERT},
 	{ "f",					Command::FALSE_OBS},
 	{ "fo",					Command::FALSE_OBS},
-	{ "false-observations",	Command::FALSE_OBS}
+	{ "false-proj",			Command::FALSE_OBS}
 };
 
 void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode);
