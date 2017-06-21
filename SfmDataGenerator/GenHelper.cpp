@@ -86,17 +86,14 @@ void GenHelper::takeUsualPhoto() {
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
 	Mat undist;
 	vector<Vec2f> dist;
-	cerr << "collect" << endl;
 	for (int i = 0; i < img.rows; ++i) {
 		for (int j = 0; j < img.cols; ++j) {
 			dist.emplace_back((float)j, (float)i);
 		}
 	}
-	cerr << "undistort" << endl;
 	undistortPoints(dist, undist, cam.K, vector<double>{ cam.k1, cam.k2, 0.0, 0.0 }, noArray(), cam.K);
 	undist = undist.reshape(0, img.rows);
 	Mat newImg;
-	cerr << "map" << endl;
 	remap(img, newImg, undist, noArray(), INTER_LINEAR, BORDER_REPLICATE);
 	imwrite(os.str(), newImg);
 	sfmData.addView(cam, view, os.str());
