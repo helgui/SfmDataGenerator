@@ -14,12 +14,19 @@ void Camera::distort(double &x, double &y) const {
 	y *= distMult;
 }
 
-cv::Point2d Camera::projectPoint(const cv::Point3d & pnt) const {
+cv::Point2d Camera::projectPoint(const cv::Point3d &pnt) const {
 	auto p = toCameraCoords(pnt);
 	p.x /= p.z;
 	p.y /= p.z;
 	distort(p.x, p.y);
 	return cv::Point2d(K(0, 0)*p.x + K(0, 2), K(1, 1)*p.y + K(1, 2));
+}
+
+cv::Point2d Camera::projectPointCamCoords(const cv::Point3d &pnt) const {
+	double x = pnt.x / pnt.z;
+	double y = pnt.y / pnt.z;
+	distort(x, y);
+	return cv::Point2d(K(0, 0)*x + K(0, 2), K(1, 1)*y + K(1, 2));
 }
 
 cv::Point3d Camera::toCameraCoords(const cv::Point3d &pnt) const {
@@ -31,7 +38,7 @@ cv::Point3d Camera::toCameraCoords(const cv::Point3d &pnt) const {
 }
 
 Camera::Camera(const cv::Matx33d &K, const cv::Matx33d &R, const cv::Vec3d &t, double k1, double k2)
-	: K(K), R(R), t(t), k1(k1), k2(k2){
+	: K(K), R(R), t(t), k1(k1), k2(k2) {
 }
 
 Camera::Camera(const cv::Matx33d &K, const cv::Affine3d &affine, double k1, double k2)

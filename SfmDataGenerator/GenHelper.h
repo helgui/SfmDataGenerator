@@ -39,5 +39,6 @@ private:
 	int counter;
 	int n;
 	Mode mode;
+	cv::Mat1f cache;
 };
 #endif

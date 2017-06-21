@@ -28,6 +28,8 @@ public:
 	cv::Point3d toCameraCoords(const cv::Point3d &pnt) const;
 	/*Computes point projection on image*/
 	cv::Point2d projectPoint(const cv::Point3d &pnt) const;
+	/*Computes point projection on image (point is in camera coords)*/
+	cv::Point2d projectPointCamCoords(const cv::Point3d &pnt) const; 
 	/*Returns 3x4 camera projection matrix*/
 	cv::Matx34d cameraMat() const;
 	/*Returns focal length along X axis (in pixels)*/

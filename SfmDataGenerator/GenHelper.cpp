@@ -10,7 +10,7 @@ using namespace cv;
 
 GenHelper::GenHelper(viz::Viz3d &viz, Mat &cloud, SfmData &sfmData, const string& imgFolder, Mode mode) :
 	viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder), camParams("Lens distortion"), mode(mode),
-	camParamsDisplay(0), progressDisplay(0){
+	camParamsDisplay(0), progressDisplay(0), cache(){
 }
 
 Point3d GenHelper::getPoint(int idx) const {
@@ -63,22 +63,33 @@ void GenHelper::takePhoto() {
 
 void GenHelper::takeUsualPhoto() {
 	Size ws = viz.getCamera().getWindowSize();
+	if (cache.size() != ws) {
+		cache.create(ws);
+	}
+	cache.setTo(-1.0f);
 	Camera cam(viz, camParams.k1(), camParams.k2());
 	vector<Observation> view;
+	Point3d winCoords;
 	for (int i = 0; i < n; ++i) {
-		Point3d pnt = getPoint(i);
-		if (cam.toCameraCoords(pnt).z <= 0.0)
+		const Point3d& pnt = getPoint(i);
+		const Point3d& pntCam = cam.toCameraCoords(pnt);
+		const Point2d& pntImg = cam.projectPointCamCoords(pntCam);
+		
+		if (pntCam.z <= 0.0 || pntImg.x < 0.0 || pntImg.x > ws.width ||
+			pntImg.y < 0.0 || pntImg.y > ws.height) {
 			continue;
+		}
 
-		Point3d winCoords;
 		viz.convertToWindowCoordinates(pnt, winCoords);
 
-		//Frustum testing
-		if (winCoords.x < 0 || winCoords.y < 0 || winCoords.x > ws.width || winCoords.y > ws.height) continue;
-
 		//Depth testing
-		if (winCoords.z - viz.getDepth(Point((int)round(winCoords.x), (int)round(winCoords.y))) > 1e-4) continue;
-		view.emplace_back(i, cam.projectPoint(pnt));
+		Point proj((int)round(winCoords.x), (int)round(winCoords.y));
+		float &d = cache.at<float>(proj);
+		if (d < 0.0f) {
+			d = viz.getDepth(proj);
+		}
+		if (d != 1.0 && winCoords.z  > d + 1e-3) continue;
+		view.emplace_back(i, pntImg);
 	}
 	Mat img = viz.getScreenshot();
 	ostringstream os;
@@ -129,7 +140,6 @@ void GenHelper::showProgress() {
 void GenHelper::hideProgress() {
 	if (!progressDisplay) return;
 	viz.removeWidget("progress");
-	
 }
 
 void GenHelper::takeDepth() {
@@ -146,6 +156,7 @@ void GenHelper::takeDepth() {
 			if (d == 1.0) continue;
 			double depthSample = 2.0 * d - 1.0;
 			d = 2.0*d - 1.0;
+			//convert OpenGL depth to metric depth
 			depth(ws.height - i - 1, j) = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - depthSample * (clip[1] - clip[0])));
 		}
 	}
