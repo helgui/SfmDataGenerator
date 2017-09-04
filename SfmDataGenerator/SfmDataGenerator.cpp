@@ -236,8 +236,10 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 		//helper.showCameraParams();
 		viz.spinOnce(300, true);
 	}
-	if (mode == Mode::SFM)
+	if (mode == Mode::SFM) {
 		sfmData.fillCloud(mesh.cloud);
-	sfmData.applyTransform(sfmData.getCameras()[0].pose());
+	}
+	if (!sfmData.getViews().empty())
+		sfmData.applyTransform(sfmData.getCameras()[0].pose());
 	sfmData.save(outFile);
 }
