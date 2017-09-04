@@ -103,11 +103,23 @@ bool SfmData::saveToTxt(const string &filename) const {
 		out << cameras[i].k1 << ' ' << cameras[i].k2 << endl;
 		out << views[i].size() << endl;
 		for (const Observation& obs : views[i]) {
-			out << obs.d << ' ' << obs.x << ' ' << obs.y << endl;
+			out <<  obs.d << ' ' << obs.x << ' ' << obs.y << endl;
 		}
 	}
 	for (const Point3d &pnt : cloud) {
 		out << pnt.x << ' ' << pnt.y << ' ' << pnt.z << endl;
+	}
+}
+
+void SfmData::applyTransform(const Affine3d &M) {
+	auto M_inv = M.inv();
+	for (auto& cam : cameras) {
+		auto tmp = cam.pose()*M_inv;
+		cam.R = tmp.rotation();
+		cam.t = tmp.translation();
+	}
+	for (auto &p : cloud) {
+		p = M*p;
 	}
 }
 
@@ -133,16 +145,20 @@ void SfmData::addGaussianNoise(double stDev) {
 void SfmData::showObservations(int viewIdx) const {
 	if (!btw(viewIdx, 0, (int)views.size()))
 		return;
+	const string winName = "Image #" + to_string(viewIdx);
 	Mat img = imread(images[viewIdx]);
+	if (img.type() == CV_32F) { //depth image
+		normalize(img, img, 0.0, 1.0, NORM_MINMAX);
+	}
 	vector <KeyPoint> kp;
 	for (auto & obs : views[viewIdx])
 		kp.emplace_back(Point2f((float)obs.x, (float)obs.y), 5.0f);
 	Mat outImg;
 	drawKeypoints(img, kp, outImg);
-	namedWindow("Observations", 1);
-	imshow("Observations", outImg);
+	namedWindow(winName, 1);
+	imshow(winName, outImg);
 	waitKey();
-	destroyWindow("Observations");
+	destroyWindow(winName);
 }
 
 void SfmData::showObservations(int viewIdx, ostream &os) const {

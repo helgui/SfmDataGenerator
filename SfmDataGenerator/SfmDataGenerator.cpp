@@ -238,5 +238,6 @@ void genDataset(const string &inFile, const string &outDir, const string & outFi
 	}
 	if (mode == Mode::SFM)
 		sfmData.fillCloud(mesh.cloud);
+	sfmData.applyTransform(sfmData.getCameras()[0].pose());
 	sfmData.save(outFile);
 }

@@ -74,16 +74,17 @@ void GenHelper::takeUsualPhoto() {
 		const Point3d& pnt = getPoint(i);
 		const Point3d& pntCam = cam.toCameraCoords(pnt);
 		const Point2d& pntImg = cam.projectPointCamCoords(pntCam);
-		
 		if (pntCam.z <= 0.0 || pntImg.x < 0.0 || pntImg.x > ws.width ||
 			pntImg.y < 0.0 || pntImg.y > ws.height) {
 			continue;
 		}
-
 		viz.convertToWindowCoordinates(pnt, winCoords);
-
 		//Depth testing
 		Point proj((int)round(winCoords.x), (int)round(winCoords.y));
+		if (proj.x < 0) proj.x = 0;
+		if (proj.x >= ws.width) proj.x = ws.width - 1;
+		if (proj.y < 0) proj.y = 0;
+		if (proj.y >= ws.height) proj.y = ws.height - 1;
 		float &d = cache.at<float>(proj);
 		if (d < 0.0f) {
 			d = viz.getDepth(proj);
@@ -152,10 +153,9 @@ void GenHelper::takeDepth() {
 		for (int j = 0; j < ws.width; ++j) {
 			double d = viz.getDepth(Point(j, i));
 			if (d == 1.0) continue;
-			double depthSample = 2.0 * d - 1.0;
 			d = 2.0*d - 1.0;
-			//convert OpenGL depth to metric depth
-			depth(ws.height - i - 1, j) = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - depthSample * (clip[1] - clip[0])));
+			//convert OpenGL depth to a metric depth
+			depth(ws.height - i - 1, j) = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - d * (clip[1] - clip[0])));
 		}
 	}
 	ostringstream os;
@@ -163,5 +163,5 @@ void GenHelper::takeDepth() {
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter;
 	imwrite(os.str() + ".exr", depth);
 	imwrite(os.str() + ".png", viz.getScreenshot()); //rgb image
-	sfmData.addView(cam, view, os.str());
+	sfmData.addView(cam, view, os.str() + ".exr");
 }

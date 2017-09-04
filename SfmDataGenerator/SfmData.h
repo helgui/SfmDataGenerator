@@ -65,6 +65,23 @@ public:
 	void showInfo(std::ostream & os = std::cout) const;
 	void showViewInfo(int idx1, std::ostream & os = std::cout) const;
 	void showMatchInfo(int idx1, int idx2, std::ostream & os = std::cout) const;
+	/*
+		Apply tranformation M to the scene points
+	*/
+	void applyTransform(const cv::Affine3d &M);
+
+	const auto& getCameras() const {
+		return cameras;
+	}
+
+	const auto& getViews() const {
+		return views;
+	}
+
+	const auto& getPoints() const {
+		return cloud;
+	}
+
 private:
 	/*Maximum point descriptor*/
 	int maxIdx;
