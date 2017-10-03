@@ -40,7 +40,7 @@ gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
 
 | Parameter     | Description                                      | Values        | Default |
 |---------------|--------------------------------------------------|---------------|---------|
-| `<model>`| Path to input model                              |               |		 |
+| `<model>`    | Path to input model                              |               |		 |
 | `<out-dir>`  | Output directory                                 |               |			 |
 | `<fmt>`       | Format of dataset                                | txt, xml, yml | txt	 |
 | `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil | sfm     |
