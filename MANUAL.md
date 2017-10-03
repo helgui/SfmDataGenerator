@@ -46,6 +46,8 @@ gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
 | `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil | sfm     |
 | `<texture>`   | Path to texture file (only for OBJ-models)       |               |        |
 
+**Note: input model is shifted and scaled to be in cube (-0.5, -0.5, -0.5) - (0.5, 0.5, 0.5)**
+
 ## view
 *Alias: v*
 
