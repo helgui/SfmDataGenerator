@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv;
 
-GenHelper::GenHelper(viz::Viz3d &viz, Mat &cloud, SfmData &sfmData, const string& imgFolder, Mode mode) :
+GenHelper::GenHelper(viz::Viz3d &viz, const Mat &cloud, SfmData &sfmData, const string& imgFolder, Mode mode) :
 	viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder), camParams("Lens distortion"), mode(mode),
 	camParamsDisplay(0), progressDisplay(0), cache(){
 }

@@ -35,15 +35,16 @@ Run dataset generation
 
 Usage:
 ```
-gen -in=<input-ply> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
+gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
 ```
 
 | Parameter     | Description                                      | Values        | Default |
 |---------------|--------------------------------------------------|---------------|---------|
-| `<input-ply>`| Path to input PLY model                          |               |		 |
+| `<model>`| Path to input model                              |               |		 |
 | `<out-dir>`  | Output directory                                 |               |			 |
 | `<fmt>`       | Format of dataset                                | txt, xml, yml | txt	 |
 | `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil | sfm     |
+| `<texture>`   | Path to texture file (only for OBJ-models)       |               |        |
 
 ## view
 *Alias: v*

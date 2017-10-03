@@ -20,8 +20,8 @@ public:
 	std::string imgFolder;
 	SfmData &sfmData;
 	cv::viz::Viz3d &viz;
-	cv::Mat &cloud;
-	GenHelper(cv::viz::Viz3d &viz, cv::Mat &cloud, SfmData &sfmData, const std::string& imgFolder, Mode mode);
+	const cv::Mat &cloud;
+	GenHelper(cv::viz::Viz3d &viz, const cv::Mat &cloud, SfmData &sfmData, const std::string& imgFolder, Mode mode);
 	cv::Point3d getPoint(int idx) const;
 	void changeCameraParams();
 	void showCameraParams();

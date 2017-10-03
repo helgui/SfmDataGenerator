@@ -135,6 +135,23 @@ void centralize(cv::Mat &points) {
 	for (auto it = points.begin<T>(); it != points.end<T>(); ++it) {
 		*it -= centroid;
 	}
-	cv::normalize(points, points, -0.5, 0.5, cv::NORM_MINMAX);
+	cv::normalize(points, points, 0.5, 0.0, cv::NORM_INF);
+}
+
+static inline
+cv::viz::Mesh loadTexturedMesh(const std::string &meshFile, const std::string &texFile) {
+	auto inputType = cv::viz::Mesh::LOAD_PLY;
+	if (fileExt(meshFile) == ".obj")
+		inputType = cv::viz::Mesh::LOAD_OBJ;
+	auto mesh = cv::viz::Mesh::load(meshFile, inputType);
+	if (!texFile.empty())
+		mesh.texture = cv::imread(texFile);
+	if (mesh.cloud.type() == CV_32FC3) {
+		centralize<cv::Vec3f>(mesh.cloud);
+	}
+	if (mesh.cloud.type() == CV_64FC3) {
+		centralize<cv::Vec3d>(mesh.cloud);
+	}
+	return mesh;
 }
 #endif

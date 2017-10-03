@@ -23,6 +23,7 @@ const string keys =
 "{stdev          |0.03  | Standart deviation    }"
 "{in             |<none>| Input file            }"
 "{out            |<none>| Output file or folder }"
+"{tex            |<none>| Texture file          }"
 "{count          |50    | Count of false matches}"
 "{ratio          |0.2   | Ratio of false matches}"
 "{format         |txt   | Output file format    }"
@@ -70,7 +71,7 @@ const map<string, Command> aliasOf = {
 	{ "false-proj",			Command::FALSE_OBS}
 };
 
-void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode);
+void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFile, Mode mode);
 
 int main(int argc, char *argv[]) {
 	CommandLineParser parser(argc, argv, keys);
@@ -122,6 +123,10 @@ int main(int argc, char *argv[]) {
 			string inFile = parser.get<string>("in", false);
 			string outDir = parser.get<string>("out", false);
 			string format = parser.get<string>("format", true);
+			string texture;
+			if (parser.has("tex")) {
+				texture = parser.get<string>("tex", false);
+			}
 			Mode mode = modeFromString(parser.get<string>("mode", true));
 			if (format != "xml" && format != "yml" && format != "txt") {
 				cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
@@ -131,7 +136,7 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format, mode);
+			genDataset(loadTexturedMesh(inFile, texture), outDir, outDir + "/" + defaultFilename + "." + format, mode);
 			return 0;
 		}
 
@@ -186,17 +191,10 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-void genDataset(const string &inFile, const string &outDir, const string & outFile, Mode mode) {
+void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFile, Mode mode) {
 	SfmData sfmData;
 	viz::Viz3d viz("Virtual camera");
 	viz::Camera cam = viz.getCamera();
-	viz::Mesh mesh = viz::readMesh(inFile);
-	if (mesh.cloud.type() == CV_32FC3) {
-		centralize<Vec3f>(mesh.cloud);
-	}
-	if (mesh.cloud.type() == CV_64FC3) {
-		centralize<Vec3d>(mesh.cloud);
-	}
 	viz.showWidget("mesh", viz::WMesh(mesh));
 	viz.setRenderingProperty("mesh", viz::SHADING, viz::SHADING_PHONG);
 	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode);

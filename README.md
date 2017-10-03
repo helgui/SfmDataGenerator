@@ -5,7 +5,7 @@ SfmDataGenerator is a software for generating 3D computer vision datasets:
  * RGB-D datasets
  * Silhouette reconstruction datasets
 
-The dataset is being created by moving virtual camera around a 3D-model and taking photos from different viewpoints. A 3D-model is presented in [PLY](http://paulbourke.net/dataformats/ply/) format. Virtual camera is fully consistent with the *pinhole camera* model.
+The dataset is being created by moving virtual camera around a 3D-model and taking photos from different viewpoints. SfmDataGenerator supports 3D-models [PLY](http://paulbourke.net/dataformats/ply/) and [OBJ](http://paulbourke.net/dataformats/obj/) models. Virtual camera is fully consistent with the *pinhole camera* model.
 
 Generated dataset (camera parameters for each viewpoint & 3d point cloud if provided) may be stored in *txt*, *yml* or *xml* files. Images & silhouettes are saved to *png* files, depth images are saved to floating point *exr* image.
 

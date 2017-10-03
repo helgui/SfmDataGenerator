@@ -89,6 +89,7 @@ bool SfmData::save(const string &filename) const {
 
 bool SfmData::saveToTxt(const string &filename) const {
 	ofstream out(filename);
+	out << setprecision(10);
 	if (!out.is_open())
 		return false;
 	out << views.size() << ' ' << cloud.size() << endl;
@@ -102,8 +103,8 @@ bool SfmData::saveToTxt(const string &filename) const {
 		out << endl;
 		out << cameras[i].k1 << ' ' << cameras[i].k2 << endl;
 		out << views[i].size() << endl;
-		for (const Observation& obs : views[i]) {
-			out <<  obs.d << ' ' << obs.x << ' ' << obs.y << endl;
+		for (const Observation &obs : views[i]) {
+			out << obs.x << ' ' << obs.y << endl;
 		}
 	}
 	for (const Point3d &pnt : cloud) {
