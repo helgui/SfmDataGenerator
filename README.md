@@ -15,12 +15,5 @@ Generated dataset (camera parameters for each viewpoint & 3d point cloud if prov
 SfmDataGenerator is written using OpenCV library with modified Viz module, which you can build from [repository](https://github.com/helgui/opencv). If you already have an OpenCV library installed, you only need to rebuild Viz module.
 ## Use
 See [manual](MANUAL.md)
-
-PLY models are available at:
- * [The Stanford 3D Scanning Repository](http://graphics.stanford.edu/data/3Dscanrep)
- * [Large geometric models archive](http://www.cc.gatech.edu/projects/large_models)
- * [KSCAN3D Gallery](http://www.kscan3d.com/gallery)
- * [PLY Files an ASCII Polygon Format](http://people.sc.fsu.edu/~jburkardt/data/ply/ply.html)
-
 ## Author
 Oleg Yakovlev
