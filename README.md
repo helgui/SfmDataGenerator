@@ -12,7 +12,7 @@ Generated dataset (camera parameters for each viewpoint & 3d point cloud if prov
 [Demo]()
 
 ## Pre-requisite
-SfmDataGenerator is written using OpenCV library with modified Viz module, which you can build from [repository](https://github.com/helgui/opencv). If you already have an OpenCV library installed, you only need to rebuild Viz module.
+SfmDataGenerator is written in OpenCV environment. It uses modified OpenCV Viz module ([repo](https://github.com/helgui/viz)) with access to low-level VTK routines. If you already have an OpenCV library installed, you only need to rebuild Viz module.
 ## Use
 See [manual](MANUAL.md)
 ## Author
