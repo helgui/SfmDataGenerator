@@ -104,7 +104,7 @@ bool SfmData::saveToTxt(const string &filename) const {
 		out << cameras[i].k1 << ' ' << cameras[i].k2 << endl;
 		out << views[i].size() << endl;
 		for (const Observation &obs : views[i]) {
-			out << obs.x << ' ' << obs.y << endl;
+			out << obs.d << ' ' << obs.x << ' ' << obs.y << endl;
 		}
 	}
 	for (const Point3d &pnt : cloud) {
@@ -147,15 +147,17 @@ void SfmData::showObservations(int viewIdx) const {
 	if (!btw(viewIdx, 0, (int)views.size()))
 		return;
 	const string winName = "Image #" + to_string(viewIdx);
-	Mat img = imread(images[viewIdx]);
-	if (img.type() == CV_32F) { //depth image
-		normalize(img, img, 0.0, 1.0, NORM_MINMAX);
-	}
-	vector <KeyPoint> kp;
-	for (auto & obs : views[viewIdx])
-		kp.emplace_back(Point2f((float)obs.x, (float)obs.y), 5.0f);
+	Mat img = imread(images[viewIdx], IMREAD_ANYDEPTH | IMREAD_ANYCOLOR);
 	Mat outImg;
-	drawKeypoints(img, kp, outImg);
+	if (img.type() == CV_32F) { //depth image
+		normalize(img, outImg, 0.0, 1.0, NORM_MINMAX);
+	} else {
+		vector <KeyPoint> kp;
+		for (auto & obs : views[viewIdx]) {
+			kp.emplace_back(Point2f((float)obs.x, (float)obs.y), 5.0f);
+		}
+		drawKeypoints(img, kp, outImg);
+	}
 	namedWindow(winName, 1);
 	imshow(winName, outImg);
 	waitKey();
@@ -170,15 +172,21 @@ void SfmData::showObservations(int viewIdx, ostream &os) const {
 void SfmData::showMatches(int viewIdx1, int viewIdx2) const {
 	if (!btw(viewIdx1, 0, (int)views.size()) || !btw(viewIdx2, 0, (int)views.size()))
 		return;
-	Mat img1 = imread(images[viewIdx1]);
-	Mat img2 = imread(images[viewIdx2]);
-	vector <KeyPoint> kp1, kp2;
-	getMatches(views[viewIdx1], views[viewIdx2], kp1, kp2);
-	vector <DMatch> matches;
-	for (int i = 0; i < (int)kp1.size(); ++i)
-		matches.emplace_back(i, i, 0.0f);
+	Mat img1 = imread(images[viewIdx1], IMREAD_ANYDEPTH);
+	Mat img2 = imread(images[viewIdx2], IMREAD_ANYDEPTH);
 	Mat out;
-	drawMatches(img1, kp1, img2, kp2, matches, out);
+	if (img1.type() == CV_32F) {
+		normalize(img1, img1, 0.0, 1.0, NORM_MINMAX);
+		normalize(img2, img2, 0.0, 1.0, NORM_MINMAX);
+		hconcat(img1, img2, out);
+	} else {
+		vector <KeyPoint> kp1, kp2;
+		getMatches(views[viewIdx1], views[viewIdx2], kp1, kp2);
+		vector <DMatch> matches;
+		for (int i = 0; i < (int)kp1.size(); ++i)
+			matches.emplace_back(i, i, 0.0f);
+		drawMatches(img1, kp1, img2, kp2, matches, out);
+	}
 	namedWindow("Matches", 0);
 	imshow("Matches", out);
 	waitKey();

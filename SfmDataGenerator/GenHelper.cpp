@@ -10,7 +10,7 @@ using namespace cv;
 
 GenHelper::GenHelper(viz::Viz3d &viz, const Mat &cloud, SfmData &sfmData, const string& imgFolder, Mode mode) :
 	viz(viz), cloud(cloud), sfmData(sfmData), n(cloud.cols), counter(0), imgFolder(imgFolder), camParams("Lens distortion"), mode(mode),
-	camParamsDisplay(0), progressDisplay(0), cache(){
+	camParamsDisplay(0), progressDisplay(0) {
 }
 
 Point3d GenHelper::getPoint(int idx) const {
@@ -63,13 +63,15 @@ void GenHelper::takePhoto() {
 
 void GenHelper::takeUsualPhoto() {
 	Size ws = viz.getCamera().getWindowSize();
-	if (cache.size() != ws) {
-		cache.create(ws);
-	}
-	cache.setTo(-1.0f);
 	Camera cam(viz, camParams.k1(), camParams.k2());
 	vector<Observation> view;
 	Point3d winCoords;
+	vtkRenderWindow *renderWindow = (vtkRenderWindow*)viz.getVtkRenderWindow();
+	vtkSmartPointer<vtkFloatArray> zBufferRaw = vtkSmartPointer<vtkFloatArray>::New();
+	zBufferRaw->SetNumberOfComponents(1);
+	zBufferRaw->SetNumberOfValues(ws.area());
+	renderWindow->GetZbufferData(0, 0, ws.width - 1, ws.height - 1, zBufferRaw);
+	Mat depth(ws, CV_32F, zBufferRaw->GetPointer(0));
 	for (int i = 0; i < n; ++i) {
 		const Point3d& pnt = getPoint(i);
 		const Point3d& pntCam = cam.toCameraCoords(pnt);
@@ -85,11 +87,8 @@ void GenHelper::takeUsualPhoto() {
 		if (proj.x >= ws.width) proj.x = ws.width - 1;
 		if (proj.y < 0) proj.y = 0;
 		if (proj.y >= ws.height) proj.y = ws.height - 1;
-		float &d = cache.at<float>(proj);
-		if (d < 0.0f) {
-			d = viz.getDepth(proj);
-		}
-		if (d != 1.0 && winCoords.z  > d + 1e-3) continue;
+		float d = depth.at<float>(proj);
+		if (d != 1.0f && winCoords.z > d + 1e-3) continue;
 		view.emplace_back(i, pntImg);
 	}
 	Mat img = viz.getScreenshot();
@@ -116,9 +115,15 @@ void GenHelper::takeSilhouette() {
 	Camera cam(viz, 0.0, 0.0);
 	vector<Observation> view;
 	Mat screen(ws, CV_8UC3);
+	vtkRenderWindow *renderWindow = (vtkRenderWindow*)viz.getVtkRenderWindow();
+	vtkSmartPointer<vtkFloatArray> zBufferRaw = vtkSmartPointer<vtkFloatArray>::New();
+	zBufferRaw->SetNumberOfComponents(1);
+	zBufferRaw->SetNumberOfValues(ws.area());
+	renderWindow->GetZbufferData(0, 0, ws.width - 1, ws.height - 1, zBufferRaw);
+	Mat depth(ws, CV_32F, zBufferRaw->GetPointer(0));
 	for (int i = 0; i < ws.height; ++i) {
 		for (int j = 0; j < ws.width; ++j) {
-			if (viz.getDepth(Point(j, ws.height - i - 1)) == 1.0) {
+			if (depth.at<float>(ws.height - i - 1, j) == 1.0f) {
 				screen.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
 			}
 			else {
@@ -147,15 +152,21 @@ void GenHelper::takeDepth() {
 	Size ws = viz.getCamera().getWindowSize();
 	Camera cam(viz, 0.0, 0.0);
 	Vec2d clip = viz.getCamera().getClip();
-	Mat1f depth = Mat1f::zeros(ws);
 	View view;
+	vtkRenderWindow *renderWindow = (vtkRenderWindow*)viz.getVtkRenderWindow();
+	vtkSmartPointer<vtkFloatArray> zBufferRaw = vtkSmartPointer<vtkFloatArray>::New();
+	zBufferRaw->SetNumberOfComponents(1);
+	zBufferRaw->SetNumberOfValues(ws.area());
+	renderWindow->GetZbufferData(0, 0, ws.width - 1, ws.height - 1, zBufferRaw);
+	Mat tmp(ws, CV_32F, zBufferRaw->GetPointer(0));
+	Mat depth(ws, CV_32F);
+	flip(tmp, depth, 0);
 	for (int i = 0; i < ws.height; ++i) {
 		for (int j = 0; j < ws.width; ++j) {
-			double d = viz.getDepth(Point(j, i));
-			if (d == 1.0) continue;
-			d = 2.0*d - 1.0;
+			float& d = depth.at<float>(i, j);
+			if (d == 1.0f) continue;
 			//convert OpenGL depth to a metric depth
-			depth(ws.height - i - 1, j) = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - d * (clip[1] - clip[0])));
+			d = float((2.0 * clip[0] * clip[1]) / (clip[1] + clip[0] - (2.0*d - 1.0)*(clip[1] - clip[0])));
 		}
 	}
 	ostringstream os;

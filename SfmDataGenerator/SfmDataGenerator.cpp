@@ -74,6 +74,7 @@ const map<string, Command> aliasOf = {
 void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFile, Mode mode);
 
 int main(int argc, char *argv[]) {
+	//vtkObject::GlobalWarningDisplayOff();
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
