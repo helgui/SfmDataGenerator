@@ -34,7 +34,7 @@ GenHelper::GenHelper(viz::Viz3d &viz, const Mat &cloud, SfmData &sfmData, const 
 }
 
 Point3d GenHelper::getPoint(int idx) const {
-	return cloud.at<Vec3f>(idx);
+	return cloud.type() == CV_32FC3 ? cloud.at<Vec3f>(idx) : cloud.at<Vec3d>(idx);
 }
 
 void GenHelper::changeCameraParams() {

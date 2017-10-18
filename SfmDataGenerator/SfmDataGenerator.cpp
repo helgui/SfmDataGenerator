@@ -28,6 +28,7 @@ SOFTWARE.
 #include "SfmData.h"
 #include "GenHelper.h"
 #include "Slider.h"
+#include "ModelImport.h"
 
 using namespace std;
 using namespace cv;
@@ -43,7 +44,6 @@ const string keys =
 "{stdev          |0.03  | Standart deviation    }"
 "{in             |<none>| Input file            }"
 "{out            |<none>| Output file or folder }"
-"{tex            |<none>| Texture file          }"
 "{count          |50    | Count of false matches}"
 "{ratio          |0.2   | Ratio of false matches}"
 "{format         |txt   | Output file format    }"
@@ -91,10 +91,10 @@ const map<string, Command> aliasOf = {
 	{ "false-proj",			Command::FALSE_OBS}
 };
 
-void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFile, Mode mode);
+void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode);
 
 int main(int argc, char *argv[]) {
-	//vtkObject::GlobalWarningDisplayOff();
+	vtkObject::GlobalWarningDisplayOff();
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("SfmDataGenerator v" + to_string(SFM_DATA_GENERATOR_MAJ_VER) + "." +
 		to_string(SFM_DATA_GENERATOR_MIN_VER));
@@ -144,10 +144,7 @@ int main(int argc, char *argv[]) {
 			string inFile = parser.get<string>("in", false);
 			string outDir = parser.get<string>("out", false);
 			string format = parser.get<string>("format", true);
-			string texture;
-			if (parser.has("tex")) {
-				texture = parser.get<string>("tex", false);
-			}
+
 			Mode mode = modeFromString(parser.get<string>("mode", true));
 			if (format != "xml" && format != "yml" && format != "txt") {
 				cerr << "Warning: Unknown format \"" + format + "\" replaced by default \"txt\" format";
@@ -157,7 +154,7 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			genDataset(loadTexturedMesh(inFile, texture), outDir, outDir + "/" + defaultFilename + "." + format, mode);
+			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format, mode);
 			return 0;
 		}
 
@@ -212,13 +209,12 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFile, Mode mode) {
+void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode) {
 	SfmData sfmData;
 	viz::Viz3d viz("Virtual camera");
+	Mat cloud = importModel(inFile, viz, mode == Mode::SFM);
 	viz::Camera cam = viz.getCamera();
-	viz.showWidget("mesh", viz::WMesh(mesh));
-	viz.setRenderingProperty("mesh", viz::SHADING, viz::SHADING_PHONG);
-	GenHelper helper(viz, mesh.cloud, sfmData, outDir + "/" + defaultImgFolder, mode);
+	GenHelper helper(viz, cloud, sfmData, outDir + "/" + defaultImgFolder, mode);
 	viz.registerKeyboardCallback([](const viz::KeyboardEvent &event, void * cookie) -> void {
 		GenHelper * helper = (GenHelper *)cookie;
 		if (event.action == viz::KeyboardEvent::KEY_DOWN) {
@@ -256,7 +252,7 @@ void genDataset(const viz::Mesh &mesh, const string &outDir, const string &outFi
 		viz.spinOnce(300, true);
 	}
 	if (mode == Mode::SFM) {
-		sfmData.fillCloud(mesh.cloud);
+		sfmData.fillCloud(cloud);
 	}
 	if (!sfmData.getViews().empty())
 		sfmData.applyTransform(sfmData.getCameras()[0].pose());

@@ -150,16 +150,20 @@
     <ClInclude Include="CameraCustomizer.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="GenHelper.h" />
+    <ClInclude Include="ModelImport.h" />
     <ClInclude Include="MotionScripts.h" />
     <ClInclude Include="SfmData.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Slider.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="WMaterialMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraCustomizer.cpp" />
     <ClCompile Include="GenHelper.cpp" />
+    <ClCompile Include="ModelImport.cpp" />
     <ClCompile Include="SfmDataGenerator.cpp" />
     <ClCompile Include="SfmData.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -169,6 +173,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Slider.cpp" />
+    <ClCompile Include="WMaterialMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MANUAL.md" />

@@ -146,18 +146,30 @@ cv::Vec3b valueToColor(double value) {
 }
 
 template<class T>
-void centralize(cv::Mat &points) {
-	T centroid(0, 0, 0);
-	for (auto it = points.begin<T>(); it != points.end<T>(); ++it) {
+void centralize(cv::Mat &points, double cubeSize) {
+	typedef cv::Vec<T, 3> PointType;
+	PointType centroid(0, 0, 0);
+	for (auto it = points.begin<PointType>(); it != points.end<PointType>(); ++it) {
 		centroid += *it;
 	}
-	centroid *= 1.0/points.total();
-	for (auto it = points.begin<T>(); it != points.end<T>(); ++it) {
+	centroid *= 1.0 / points.total();
+	for (auto it = points.begin<PointType>(); it != points.end<PointType>(); ++it) {
 		*it -= centroid;
 	}
-	cv::normalize(points, points, 0.5, 0.0, cv::NORM_INF);
+	cv::normalize(points, points, 0.5*cubeSize, 0.0, cv::NORM_INF);
 }
 
+static inline
+void centralize(cv::InputOutputArray _points) {
+	cv::Mat points = _points.getMat();
+	CV_Assert(points.type() == CV_32FC3 || points.type() == CV_64FC3);
+	if (points.type() == CV_32FC3)
+		centralize<float>(points, 1.0);
+	else
+		centralize<double>(points, 1.0);
+}
+
+/*
 static inline
 cv::viz::Mesh loadTexturedMesh(const std::string &meshFile, const std::string &texFile) {
 	auto inputType = cv::viz::Mesh::LOAD_PLY;
@@ -174,4 +186,5 @@ cv::viz::Mesh loadTexturedMesh(const std::string &meshFile, const std::string &t
 	}
 	return mesh;
 }
+*/
 #endif

@@ -38,6 +38,15 @@
     <ClInclude Include="MotionScripts.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="ModelImport.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WMaterialMesh.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -60,6 +69,12 @@
     </ClCompile>
     <ClCompile Include="CameraCustomizer.cpp">
       <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelImport.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WMaterialMesh.cpp">
+      <Filter>Header files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
