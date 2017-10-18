@@ -44,7 +44,6 @@ gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
 | `<out-dir>`  | Output directory                                 |               |			 |
 | `<fmt>`       | Format of dataset                                | txt, xml, yml | txt	 |
 | `<mode>`      | Dataset generation mode (SfM, Depth, Silhouette) | sfm, dep, sil | sfm     |
-| `<texture>`   | Path to texture file (only for OBJ-models)       |               |        |
 
 **Note: input model is shifted and scaled to be in cube (-0.5, -0.5, -0.5) - (0.5, 0.5, 0.5)**
 
@@ -112,7 +111,7 @@ np -in=<input> -out=<output> [-stdev=<stdev>]
 
 *Aliases: fp, f*
 
-Add wrong point-projection correspondences. It emulates a real feature matching.
+Add outliers to point-projection correspondences. It simulates wrong feature match.
 
 Usage:
 ```
