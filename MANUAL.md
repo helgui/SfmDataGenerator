@@ -1,6 +1,7 @@
 # Contents
  * [Usage](#usage)
  * [Commands](#commands)
+ * [Interactive mode](#interactive-mode)
  * [Controls](#controls)
  * [Output formats](#output-formats)
 
@@ -15,6 +16,7 @@ Where `<command>` is one of:
  - [convert (conv, c)](#convert)
  - [noise-proj (np, n)](#noise-proj)
  - [false-proj (fp, f)](#false-proj)
+ - [run (r)](#run)
 
 In the following commands description `SfmDataGenerator` is omitted
 
@@ -127,7 +129,14 @@ fp -in=<input> -out=<output> [-ratio=<ratio>] [-count=<count>]
 
 If `<ratio>` and `<count>` are both given, `<ratio>` has priority.
 
-#Controls
+## run
+*Alias: r*
+Run SfmDataGenerator in interactive mode
+
+# Interactive mode
+Interactive mode was implemented to operate SfmDataGenerator via GUI.
+
+# Controls
 
 			 
 # Output formats

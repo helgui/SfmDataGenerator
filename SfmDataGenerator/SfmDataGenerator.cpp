@@ -58,7 +58,8 @@ enum Command {
 	NOISE_PTS,
 	FALSE_OBS,
 	HELP,
-	CONVERT
+	CONVERT,
+	RUN_INTERACTIVE
 };
 
 inline Mode modeFromString(const string &str) {
@@ -88,10 +89,67 @@ const map<string, Command> aliasOf = {
 	{ "convert",			Command::CONVERT},
 	{ "f",					Command::FALSE_OBS},
 	{ "fo",					Command::FALSE_OBS},
-	{ "false-proj",			Command::FALSE_OBS}
+	{ "false-proj",			Command::FALSE_OBS},
+	{"run",					Command::RUN_INTERACTIVE},
+	{ "r",					Command::RUN_INTERACTIVE}
 };
 
-void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode);
+SfmData curDataset;
+
+void genDataset(SfmData &sfmData, const string &inFile, const string &outDir, Mode mode);
+
+bool execute(const string &line) {
+	auto v = split(line);
+	const string &cmd = v[0];
+	if (cmd == "e") return false;
+	if (cmd == "v") {
+		curDataset.show(cout);
+		return true;
+	}
+	if (cmd == "vo") {
+		curDataset.showObservations(stoi(v[1]), cout);
+		return true;
+	}
+	if (cmd == "vm") {
+		curDataset.showMatches(stoi(v[1]), stoi(v[2]), cout);
+		return true;
+	}
+	if (cmd == "l") {
+		curDataset.load(v[1]);
+		return true;
+	}
+	if (cmd == "s") {
+		curDataset.save(v[1]);
+		return true;
+	}
+	if (cmd == "n") {
+		curDataset.addGaussianNoise(stod(v[1]));
+		return true;
+	}
+	if (cmd == "o") {
+		curDataset.addFalseObservations(stoi(v[1]));
+		return true;
+	}
+	if (cmd == "gd") {
+		genDataset(curDataset, v[1], v[2], Mode::DEPTH);
+		return true;
+	}
+	if (cmd == "g") {
+		genDataset(curDataset, v[1], v[2], Mode::SFM);
+		return true;
+	}
+	if (cmd == "gs") {
+		genDataset(curDataset, v[1], v[2], Mode::SILHOUETTE);
+		return true;
+	}
+}
+
+void runInteractive() {
+	string s;
+	do {
+		getline(cin, s);
+	} while (execute(s));
+}
 
 int main(int argc, char *argv[]) {
 	vtkObject::GlobalWarningDisplayOff();
@@ -127,16 +185,16 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			SfmData sfmData(inFile);
+			curDataset.load(inFile);
 			if (i2 != -1) {
-				sfmData.showMatches(i1, i2, cout);
+				curDataset.showMatches(i1, i2, cout);
 				return 0;
 			}
 			if (i1 != -1) {
-				sfmData.showObservations(i1, cout);
+				curDataset.showObservations(i1, cout);
 				return 0;
 			}
-			sfmData.show(cout);
+			curDataset.show(cout);
 			return 0;
 		}
 
@@ -154,7 +212,8 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			genDataset(inFile, outDir, outDir + "/" + defaultFilename + "." + format, mode);
+			genDataset(curDataset, inFile, outDir, mode);
+			curDataset.save(outDir + "/" + defaultFilename + "." + format);
 			return 0;
 		}
 
@@ -166,9 +225,9 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			SfmData sfmData(inFile);
-			sfmData.addGaussianNoise(stdDev);
-			sfmData.save(outFile);
+			curDataset.load(inFile);
+			curDataset.addGaussianNoise(stdDev);
+			curDataset.save(outFile);
 			return 0;
 		}
 
@@ -179,18 +238,18 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			SfmData sfmData(inFile);
+			curDataset.load(inFile);
 			if (parser.has("ratio")) {
-				sfmData.addFalseObservations(parser.get<double>("ratio", true));
+				curDataset.addFalseObservations(parser.get<double>("ratio", true));
 			}
 			else {
-				sfmData.addFalseObservations(parser.get<int>("count", true));
+				curDataset.addFalseObservations(parser.get<int>("count", true));
 			}
 			if (!parser.check()) {
 				parser.printErrors();
 				return 0;
 			}
-			sfmData.save(outFile);
+			curDataset.save(outFile);
 			return 0;
 		}
 
@@ -201,16 +260,20 @@ int main(int argc, char *argv[]) {
 				parser.printErrors();
 				return 0;
 			}
-			SfmData sfmData(inFile);
-			sfmData.save(outFile);
+			curDataset.load(inFile);
+			curDataset.save(outFile);
+			return 0;
+		}
+		case Command::RUN_INTERACTIVE: {
+			runInteractive();
 			return 0;
 		}
 	}
 	return 0;
 }
 
-void genDataset(const string &inFile, const string &outDir, const string &outFile, Mode mode) {
-	SfmData sfmData;
+void genDataset(SfmData &sfmData, const string &inFile, const string &outDir, Mode mode) {
+	sfmData.clear();
 	viz::Viz3d viz("Virtual camera");
 	Mat cloud = importModel(inFile, viz, mode == Mode::SFM);
 	viz::Camera cam = viz.getCamera();
@@ -256,5 +319,4 @@ void genDataset(const string &inFile, const string &outDir, const string &outFil
 	}
 	if (!sfmData.getViews().empty())
 		sfmData.applyTransform(sfmData.getCameras()[0].pose());
-	sfmData.save(outFile);
 }

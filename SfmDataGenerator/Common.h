@@ -95,6 +95,31 @@ std::string fileExt(const std::string &filename) {
 	return std::string();
 }
 
+static inline
+std::vector<std::string> split(const std::string &s) {
+	std::vector<std::string> res;
+	std::string chunk;
+	bool quote = false;
+	for (char c : s) {
+		if (c == '"') {
+			quote = !quote;
+			continue;
+		}
+		if (c == ' ') {
+			if (quote)
+				chunk += c;
+			else {
+				res.push_back(chunk);
+				chunk = "";
+			}
+			continue;
+		}
+		chunk += c;
+	}
+	res.push_back(chunk);
+	return res;
+}
+
 /*File and IO utils*/
 
 /*
