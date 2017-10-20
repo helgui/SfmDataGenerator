@@ -127,7 +127,7 @@ bool execute(const string &line) {
 		return true;
 	}
 	if (cmd == "o") {
-		curDataset.addFalseObservations(stoi(v[1]));
+		curDataset.addOutliers(stoi(v[1]));
 		return true;
 	}
 	if (cmd == "gd") {
@@ -142,6 +142,7 @@ bool execute(const string &line) {
 		genDataset(curDataset, v[1], v[2], Mode::SILHOUETTE);
 		return true;
 	}
+	return false;
 }
 
 void runInteractive() {
@@ -240,10 +241,10 @@ int main(int argc, char *argv[]) {
 			}
 			curDataset.load(inFile);
 			if (parser.has("ratio")) {
-				curDataset.addFalseObservations(parser.get<double>("ratio", true));
+				curDataset.addOutliers(parser.get<double>("ratio", true));
 			}
 			else {
-				curDataset.addFalseObservations(parser.get<int>("count", true));
+				curDataset.addOutliers(parser.get<int>("count", true));
 			}
 			if (!parser.check()) {
 				parser.printErrors();

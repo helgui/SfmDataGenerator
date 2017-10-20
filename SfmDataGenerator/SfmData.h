@@ -74,12 +74,12 @@ public:
 	*/
 	void addGaussianNoise(double stDev);
 	/*Adds a given number of false observations*/
-	void addFalseObservations(int count);
+	void addOutliers(int count);
 	/*
 	Adds false observations to SfmData by given
 	ratio
 	*/
-	void addFalseObservations(double ratio);
+	void addOutliers(double ratio);
 	/*Clean up all data*/
 	void clear();
 	void showInfo(std::ostream & os = std::cout) const;

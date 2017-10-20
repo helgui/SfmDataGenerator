@@ -218,9 +218,16 @@ void SfmData::showMatches(int viewIdx1, int viewIdx2, ostream &os) const {
 	showMatches(viewIdx1, viewIdx2);
 }
 
-void SfmData::addFalseObservations(int count) {
+void SfmData::addOutliers(int count) {
+	bool empty = true;
+	for (const View &v : views) {
+		empty = empty && views.empty();
+	}
+	if (empty || maxIdx <= 0) return;
 	for (int i = 0; i < count; ++i) {
 		int viewIdx = rand() % views.size();
+		while (views[viewIdx].empty())
+			viewIdx = rand() % views.size();
 		int obsIdx = rand() % views[viewIdx].size();
 		int newValue = rand() % (maxIdx + 1);
 		while (views[viewIdx][obsIdx].d == newValue)
@@ -229,21 +236,21 @@ void SfmData::addFalseObservations(int count) {
 	}
 }
 
-void SfmData::addFalseObservations(double ratio) {
+void SfmData::addOutliers(double ratio) {
 	int total = 0;
 	for (const auto &view : views)
 		total += view.size();
 	int count = (int)(ratio*total);
-	addFalseObservations(count);
+	addOutliers(count);
 }
 
 void SfmData::show() const {
 	viz::Viz3d viz("Point cloud");
 	viz.setBackgroundColor(viz::Color::white());
 	Mat pts(maxIdx + 1, 1, CV_64FC3);
-	for (int i = 0; i <= maxIdx; ++i)
+	for (int i = 0; i <= maxIdx; ++i) 
 		pts.at<Vec3d>(i) = cloud[i];
-	if (!pts.empty())
+	if (!pts.empty()) 
 		viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
 	for (int i = 0; i < (int)views.size(); ++i) {
 		double sz = 1e10;
@@ -252,7 +259,7 @@ void SfmData::show() const {
 			auto pnt = cameras[i].toCameraCoords(cloud[obs.d]);
 			sz = min(sz, fabs(pnt.z / 10.0));
 		}
-		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());
+		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, 0.1, viz::Color::red()), cameras[i].pose().inv());
 	}
 	viz.spin();
 }
