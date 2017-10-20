@@ -131,6 +131,7 @@ If `<ratio>` and `<count>` are both given, `<ratio>` has priority.
 
 ## run
 *Alias: r*
+
 Run SfmDataGenerator in interactive mode
 
 # Interactive mode

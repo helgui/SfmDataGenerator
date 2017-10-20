@@ -11,9 +11,14 @@ Generated dataset (camera parameters for each viewpoint & 3d point cloud if prov
 
 [Demo]()
 
+## GUI
+SfmDataGenerator was initially designed to use only command-line interface. Now it has a GUI written in C# and available only for Windows. GUI is a separate application that uses SfmDataGenerator in interactive mode as backend. So, its code is fully isolated.
+
 ## Pre-requisite
 SfmDataGenerator is written in OpenCV environment. It uses modified OpenCV Viz module ([repo](https://github.com/helgui/viz)) with access to low-level VTK routines. If you already have an OpenCV library installed, you only need to rebuild Viz module.
+
 ## Use
 See [manual](MANUAL.md)
+
 ## Author
 Oleg Yakovlev
