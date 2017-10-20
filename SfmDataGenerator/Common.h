@@ -61,15 +61,15 @@ typedef std::vector<Observation> View;
 */
 static inline 
 void getMatches(const View &view1, const View &view2, std::vector<cv::KeyPoint> &p1, std::vector<cv::KeyPoint> & p2) {
-	std::map<int, cv::Point2d> obs1;
+	std::map<int, cv::Point2f> obs1;
 	for (const auto& obs : view1)
-		obs1[obs.d] = cv::Point2d(obs.x, obs.y);
+		obs1[obs.d] = cv::Point2f((float)obs.x, (float)obs.y);
 	for (const auto& obs : view2) {
 		auto it = obs1.find(obs.d);
 		if (it == obs1.end())
 			continue;
-		//p1.emplace_back(it->second.x, it->second.y);
-		//p2.emplace_back(obs.x, obs.y);
+		p1.emplace_back(it -> second, 1.0f);
+		p2.emplace_back((float)obs.x, (float)obs.y, 1.0f);
 	}
 }
 

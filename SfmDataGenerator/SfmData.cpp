@@ -192,8 +192,8 @@ void SfmData::showObservations(int viewIdx, ostream &os) const {
 void SfmData::showMatches(int viewIdx1, int viewIdx2) const {
 	if (!btw(viewIdx1, 0, (int)views.size()) || !btw(viewIdx2, 0, (int)views.size()))
 		return;
-	Mat img1 = imread(images[viewIdx1], IMREAD_ANYDEPTH);
-	Mat img2 = imread(images[viewIdx2], IMREAD_ANYDEPTH);
+	Mat img1 = imread(images[viewIdx1], IMREAD_ANYDEPTH | IMREAD_ANYCOLOR);
+	Mat img2 = imread(images[viewIdx2], IMREAD_ANYDEPTH | IMREAD_ANYCOLOR);
 	Mat out;
 	if (img1.type() == CV_32F) {
 		normalize(img1, img1, 0.0, 1.0, NORM_MINMAX);
@@ -273,6 +273,7 @@ bool SfmData::loadFromTxt(const string &filename) {
 	ifstream in(filename);
 	if (!in.is_open())
 		return false;
+	clear();
 	int viewCount, pointCount;
 	in >> viewCount >> pointCount;
 	for (int i = 0; i < viewCount; ++i) {
