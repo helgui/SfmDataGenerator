@@ -26,6 +26,7 @@ SOFTWARE.
 #define CAMERA_CUSTOMIZER_H
 #include "stdafx.h"
 #include "Slider.h"
+
 class CameraCustomizer {
 public:
 	CameraCustomizer(const std::string &winName);
@@ -89,14 +90,15 @@ public:
 		cv::destroyWindow(winName);
 		changing = 0;
 	}
-	double k1() const;
-	double k2() const;
+	FltType k1() const;
+	FltType k2() const;
 private:
 	enum ConstParams {
 		SLIDER_WIDTH = 400,
 		SLIDER_HEIGHT = 70,
 		SLIDER_OFFSET = 50
 	};
+	//Using floats for grid points
 	std::vector<std::vector<cv::Point2f>> grid;
 	std::vector<std::vector<float>> gridNorm;
 	void updateImage();

@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 		case Command::NOISE_PTS: {
 			string inFile = parser.get<string>("in", false);
 			string outFile = parser.get<string>("out", false);
-			double stdDev = parser.get<double>("stdev", true);
+			double stdDev = parser.get<FltType>("stdev", true);
 			if (!parser.check()) {
 				parser.printErrors();
 				return 0;
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
 			}
 			curDataset.load(inFile);
 			if (parser.has("ratio")) {
-				curDataset.addOutliers(parser.get<double>("ratio", true));
+				curDataset.addOutliers(parser.get<FltType>("ratio", true));
 			}
 			else {
 				curDataset.addOutliers(parser.get<int>("count", true));

@@ -33,8 +33,8 @@ GenHelper::GenHelper(viz::Viz3d &viz, const Mat &cloud, SfmData &sfmData, const 
 	camParamsDisplay(0), progressDisplay(0) {
 }
 
-Point3d GenHelper::getPoint(int idx) const {
-	return cloud.type() == CV_32FC3 ? cloud.at<Vec3f>(idx) : cloud.at<Vec3d>(idx);
+Point3Type GenHelper::getPoint(int idx) const {
+	return cloud.at<Point3Type>(idx);
 }
 
 void GenHelper::changeCameraParams() {
@@ -93,9 +93,9 @@ void GenHelper::takeUsualPhoto() {
 	renderWindow->GetZbufferData(0, 0, ws.width - 1, ws.height - 1, zBufferRaw);
 	Mat depth(ws, CV_32F, zBufferRaw->GetPointer(0));
 	for (int i = 0; i < n; ++i) {
-		const Point3d& pnt = getPoint(i);
-		const Point3d& pntCam = cam.toCameraCoords(pnt);
-		const Point2d& pntImg = cam.projectPointCamCoords(pntCam);
+		const auto& pnt = getPoint(i);
+		const auto& pntCam = cam.toCameraCoords(pnt);
+		const auto& pntImg = cam.projectPointCamCoords(pntCam);
 		if (pntCam.z <= 0.0 || pntImg.x < 0.0 || pntImg.x > ws.width ||
 			pntImg.y < 0.0 || pntImg.y > ws.height) {
 			continue;
@@ -116,13 +116,13 @@ void GenHelper::takeUsualPhoto() {
 	counter++;
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
 	Mat undist;
-	vector<Vec2f> dist;
+	vector<Vec2f> dist; //remap only works with floats
 	for (int i = 0; i < img.rows; ++i) {
 		for (int j = 0; j < img.cols; ++j) {
 			dist.emplace_back((float)j, (float)i);
 		}
 	}
-	undistortPoints(dist, undist, cam.K, vector<double>{ cam.k1, cam.k2, 0.0, 0.0 }, noArray(), cam.K);
+	undistortPoints(dist, undist, cam.K, vector<FltType>{ cam.k1, cam.k2, 0.0, 0.0 }, noArray(), cam.K);
 	undist = undist.reshape(0, img.rows);
 	Mat newImg;
 	remap(img, newImg, undist, noArray(), INTER_LINEAR, BORDER_REPLICATE);

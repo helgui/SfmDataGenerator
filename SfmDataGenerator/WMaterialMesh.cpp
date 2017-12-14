@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "stdafx.h"
 #include "WMaterialMesh.h"
-#include "tiny_obj_loader.h"
 
 using namespace std;
 using namespace cv;
@@ -53,8 +52,8 @@ WMaterialMesh::WMaterialMesh(vtkPolyData *polyData, const material_t &material) 
 	prop->SetAmbientColor(material.ambient[0], material.ambient[1], material.ambient[2]);
 	prop->SetSpecularColor(material.specular[0], material.specular[1], material.specular[2]);
 	prop->LightingOn();
-	prop->SetInterpolationToFlat();
 	prop->ShadingOff();
+	prop->SetInterpolationToPhong();
 	string texName;
 	if (!material.diffuse_texname.empty()) {
 		texName = material.diffuse_texname;

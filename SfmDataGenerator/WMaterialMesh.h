@@ -25,6 +25,7 @@ SOFTWARE.
 #ifndef WMATERIAL_MESH_H
 #define WMATERIAL_MESH_H
 #include "stdafx.h"
+#include "Common.h"
 #include "tiny_obj_loader.h"
 
 class WMaterialMesh : public cv::viz::Widget3D {

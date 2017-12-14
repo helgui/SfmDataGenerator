@@ -46,7 +46,7 @@ void SfmData::addView(const Camera &cam, const View &view, const string &imgFile
 	images.push_back(std::experimental::filesystem::absolute(imgFile).string());
 }
 
-void SfmData::fillCloud(const Mat & mat) {
+void SfmData::fillCloud(const Mat &mat) {
 	
 	vector<int> cnt(maxIdx + 1, 0);
 	//Count observations of each point
@@ -61,7 +61,7 @@ void SfmData::fillCloud(const Mat & mat) {
 			cnt[i] = -1;
 		} else {
 			cnt[i] = cloud.size();
-			cloud.emplace_back(mat.at<Vec3f>(i)[0], mat.at<Vec3f>(i)[1], mat.at<Vec3f>(i)[2]);
+			cloud.emplace_back(mat.at<VecType>(i)[0], mat.at<VecType>(i)[1], mat.at<VecType>(i)[2]);
 		}
 	}
 
@@ -130,9 +130,10 @@ bool SfmData::saveToTxt(const string &filename) const {
 	for (const Point3d &pnt : cloud) {
 		out << pnt.x << ' ' << pnt.y << ' ' << pnt.z << endl;
 	}
+	return true;
 }
 
-void SfmData::applyTransform(const Affine3d &M) {
+void SfmData::applyTransform(const Affine3<FltType> &M) {
 	auto M_inv = M.inv();
 	for (auto& cam : cameras) {
 		auto tmp = cam.pose()*M_inv;
@@ -144,7 +145,7 @@ void SfmData::applyTransform(const Affine3d &M) {
 	}
 }
 
-void SfmData::addGaussianNoise(double stDev) {
+void SfmData::addGaussianNoise(FltType stDev) {
 	if (stDev < 0.0) {
 		for (auto& view : views) {
 			for (auto& obs : view) {
@@ -153,7 +154,7 @@ void SfmData::addGaussianNoise(double stDev) {
 			}
 		}
 	}
-	normal_distribution<double> dist(0.0, stDev);
+	normal_distribution<FltType> dist(0.0, stDev);
 	mt19937 gen((unsigned)chrono::system_clock::now().time_since_epoch().count());
 	for (auto& view : views) {
 		for (auto& obs : view) {
@@ -236,7 +237,7 @@ void SfmData::addOutliers(int count) {
 	}
 }
 
-void SfmData::addOutliers(double ratio) {
+void SfmData::addOutliers(FltType ratio) {
 	int total = 0;
 	for (const auto &view : views)
 		total += view.size();
@@ -247,11 +248,10 @@ void SfmData::addOutliers(double ratio) {
 void SfmData::show() const {
 	viz::Viz3d viz("Point cloud");
 	viz.setBackgroundColor(viz::Color::white());
-	Mat pts(maxIdx + 1, 1, CV_64FC3);
-	for (int i = 0; i <= maxIdx; ++i) 
-		pts.at<Vec3d>(i) = cloud[i];
-	if (!pts.empty()) 
-		viz.showWidget("cloud", viz::WCloud(pts, viz::Color::black()));
+	
+	if (!cloud.empty()) 
+		viz.showWidget("cloud", viz::WCloud(cloud, viz::Color::black()));
+	
 	for (int i = 0; i < (int)views.size(); ++i) {
 		double sz = 1e10;
 		if (views[i].empty()) sz = 1.0;
@@ -259,7 +259,7 @@ void SfmData::show() const {
 			auto pnt = cameras[i].toCameraCoords(cloud[obs.d]);
 			sz = min(sz, fabs(pnt.z / 10.0));
 		}
-		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, 0.1, viz::Color::red()), cameras[i].pose().inv());
+		viz.showWidget("cam" + to_string(i), viz::WCameraPosition(cameras[i].K, sz, viz::Color::red()), cameras[i].pose().inv());
 	}
 	viz.spin();
 }
@@ -288,7 +288,7 @@ bool SfmData::loadFromTxt(const string &filename) {
 		in >> cam.k1 >> cam.k2;
 		int obsCount;
 		int d;
-		double x, y;
+		FltType x, y;
 		in >> obsCount;
 		for (int j = 0; j < obsCount; ++j) {
 			in >> d >> x >> y;
@@ -297,7 +297,7 @@ bool SfmData::loadFromTxt(const string &filename) {
 		addView(cam, view, imgFile);
 	}
 	for (int i = 0; i < pointCount; ++i) {
-		double x, y, z;
+		FltType x, y, z;
 		in >> x >> y >> z;
 		cloud.emplace_back(x, y, z);
 	}
@@ -327,7 +327,7 @@ bool SfmData::loadFromXmlOrYml(const string &filename) {
 		auto obsNode = node["observations"];
 		for (auto it = obsNode.begin(); it != obsNode.end(); ++it) {
 			int d;
-			double x, y;
+			FltType x, y;
 			(*it) >> d;
 			++it;
 			(*it) >> x;
@@ -339,7 +339,7 @@ bool SfmData::loadFromXmlOrYml(const string &filename) {
 	}
 	auto pointsNode = fs["points"];
 	for (auto it = pointsNode.begin(); it != pointsNode.end(); ++it) {
-		double x, y, z;
+		FltType x, y, z;
 		(*it) >> x;
 		++it;
 		(*it) >> y;
@@ -347,6 +347,7 @@ bool SfmData::loadFromXmlOrYml(const string &filename) {
 		(*it) >> z;
 		cloud.emplace_back(x, y, z);
 	}
+	return true;
 }
 
 bool SfmData::saveToXmlOrYml(const string &filename) const {

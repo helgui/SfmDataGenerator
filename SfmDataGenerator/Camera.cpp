@@ -27,29 +27,29 @@ SOFTWARE.
 
 using namespace std;
 
-void Camera::distort(double &x, double &y) const {
-	double r2 = x*x + y*y;
-	double distMult = 1.0 + k1*r2 + k2*r2*r2;
+void Camera::distort(FltType &x, FltType &y) const {
+	FltType r2 = x*x + y*y;
+	FltType distMult = 1.0 + k1*r2 + k2*r2*r2;
 	x *= distMult;
 	y *= distMult;
 }
 
-cv::Point2d Camera::projectPoint(const cv::Point3d &pnt) const {
+Point2Type Camera::projectPoint(const Point3Type &pnt) const {
 	auto p = toCameraCoords(pnt);
 	p.x /= p.z;
 	p.y /= p.z;
 	distort(p.x, p.y);
-	return cv::Point2d(K(0, 0)*p.x + K(0, 2), K(1, 1)*p.y + K(1, 2));
+	return Point2Type(K(0, 0)*p.x + K(0, 2), K(1, 1)*p.y + K(1, 2));
 }
 
-cv::Point2d Camera::projectPointCamCoords(const cv::Point3d &pnt) const {
-	double x = pnt.x / pnt.z;
-	double y = pnt.y / pnt.z;
+Point2Type Camera::projectPointCamCoords(const Point3Type &pnt) const {
+	FltType x = pnt.x / pnt.z;
+	FltType y = pnt.y / pnt.z;
 	distort(x, y);
 	return cv::Point2d(K(0, 0)*x + K(0, 2), K(1, 1)*y + K(1, 2));
 }
 
-cv::Point3d Camera::toCameraCoords(const cv::Point3d &pnt) const {
+Point3Type Camera::toCameraCoords(const Point3Type &pnt) const {
 	auto p = R*pnt;
 	p.x += t[0];
 	p.y += t[1];
@@ -57,39 +57,39 @@ cv::Point3d Camera::toCameraCoords(const cv::Point3d &pnt) const {
 	return p;
 }
 
-Camera::Camera(const cv::Matx33d &K, const cv::Matx33d &R, const cv::Vec3d &t, double k1, double k2)
+Camera::Camera(const cv::Matx<FltType, 3, 3> &K, const cv::Matx<FltType, 3, 3> &R, const VecType &t, FltType k1, FltType k2)
 	: K(K), R(R), t(t), k1(k1), k2(k2) {
 }
 
-Camera::Camera(const cv::Matx33d &K, const cv::Affine3d &affine, double k1, double k2)
+Camera::Camera(const cv::Matx<FltType, 3, 3> &K, const cv::Affine3<FltType> &affine, FltType k1, FltType k2)
 	: Camera(K, affine.rotation(), affine.translation(), k1, k2) {
 }
 
-Camera::Camera(const cv::Matx33d &K, const cv::Vec3d &rvec, const cv::Vec3d &t, double k1, double k2)
-	: Camera(K, cv::Affine3d(rvec, t), k1, k2) {
+Camera::Camera(const cv::Matx<FltType, 3, 3> &K, const VecType &rvec, const VecType &t, FltType k1, FltType k2)
+	: Camera(K, cv::Affine3<FltType>(rvec, t), k1, k2) {
 }
 
-Camera::Camera(cv::viz::Viz3d &viz3d, double k1, double k2)
+Camera::Camera(cv::viz::Viz3d &viz3d, FltType k1, FltType k2)
 	: Camera(viz3d.getCamera(), viz3d.getViewerPose().inv(), k1, k2) {
 }
 
-Camera::Camera(const cv::viz::Camera &cam, const cv::Affine3d &affine, double k1, double k2)
-	: K(cv::Matx33d::eye()), k1(k1), k2(k2), R(affine.rotation()), t(affine.translation()) {
+Camera::Camera(const cv::viz::Camera &cam, const cv::Affine3<FltType> &affine, FltType k1, FltType k2)
+	: K(cv::Matx<FltType, 3, 3>::eye()), k1(k1), k2(k2), R(affine.rotation()), t(affine.translation()) {
 	K(0, 0) = cam.getFocalLength()[0];
 	K(0, 2) = cam.getPrincipalPoint()[0];
 	K(1, 1) = cam.getFocalLength()[1];
 	K(1, 2) = cam.getPrincipalPoint()[1];
 }
 
-Camera::Camera(double fx, double fy, double cx, double cy, const cv::Matx33d &R, const cv::Vec3d &t, double k1, double k2)
-	: K(cv::Matx33d::eye()), k1(k1), k2(k2), R(R), t(t) {
+Camera::Camera(FltType fx, FltType fy, FltType cx, FltType cy, const cv::Matx<FltType, 3, 3> &R, const VecType &t, FltType k1, FltType k2)
+	: K(cv::Matx<FltType, 3, 3>::eye()), k1(k1), k2(k2), R(R), t(t) {
 	K(0, 0) = fx;
 	K(0, 2) = cx;
 	K(1, 1) = fy;
 	K(1, 2) = cy;	
 }
 
-Camera::Camera(const cv::Matx34d & P, double k1, double k2)
+Camera::Camera(const cv::Matx<FltType, 3, 4> &P, FltType k1, FltType k2)
 	: k1(k1), k2(k2) {
 	cv::decomposeProjectionMatrix(P, K, R, t);
 }
@@ -98,30 +98,30 @@ Camera::Camera()
 	: K(), R(), t(), k1(), k2() {
 }
 
-cv::Matx34d Camera::cameraMat() const {
-	cv::Matx34d P;
+cv::Matx<FltType, 3, 4> Camera::cameraMat() const {
+	cv::Matx<FltType, 3, 4> P;
 	for (int i = 0; i < 3; ++i)
 		P.col(i) = R.col(i);
 	P.col(3) = t;
 	return P;
 }
 
-double Camera::fx() const {
+FltType Camera::fx() const {
 	return K(0, 0);
 }
 
-double Camera::fy() const {
+FltType Camera::fy() const {
 	return K(1, 1);
 }
 
-double Camera::cx() const {
+FltType Camera::cx() const {
 	return K(0, 2);
 }
 
-double Camera::cy() const {
+FltType Camera::cy() const {
 	return K(1, 2);
 }
 
-cv::Affine3d Camera::pose() const {
-	return cv::Affine3d(R, t);
+cv::Affine3<FltType> Camera::pose() const {
+	return cv::Affine3<FltType>(R, t);
 }

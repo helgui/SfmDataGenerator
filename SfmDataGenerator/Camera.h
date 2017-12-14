@@ -25,57 +25,74 @@ SOFTWARE.
 #ifndef CAMERA_H
 #define CAMERA_H
 #include "stdafx.h"
+#include "Common.h"
 
 class Camera {
 public:
 	/*Extracts camera params from 3D Visualizer*/
-	Camera(cv::viz::Viz3d & viz3d, double k1 = 0.0, double k2 = 0.0);
+	Camera(cv::viz::Viz3d & viz3d, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Contructs camera from viz::Camera and pose*/
-	Camera(const cv::viz::Camera &cam, const cv::Affine3d &affine, double k1 = 0.0, double k2 = 0.0);
+	Camera(const cv::viz::Camera &cam, const cv::Affine3<FltType> &affine, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Constructs camera from intrinsics matrix and pose*/
-	Camera(const cv::Matx33d &K, const cv::Affine3d &affine, double k1 = 0.0, double k2 = 0.0);
+	Camera(const cv::Matx<FltType, 3, 3> &K, const cv::Affine3<FltType> &affine, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Constructs camera from instrinsics matrix, rotation matrix and translation vector*/
-	Camera(const cv::Matx33d &K, const cv::Matx33d &R, const cv::Vec3d &t, double k1 = 0.0, double k2 = 0.0);
+	Camera(const cv::Matx<FltType, 3, 3> &K, const cv::Matx<FltType, 3, 3> &R, const VecType &t, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Constructs camera from intrinsics matrix, rotation and translation vectors*/
-	Camera(const cv::Matx33d &K, const cv::Vec3d &rvec, const cv::Vec3d &t, double k1 = 0.0, double k2 = 0.0);
+	Camera(const cv::Matx<FltType, 3, 3> &K, const VecType &rvec, const VecType &t, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Construtcs camera from intrinsic parameters, rotation matrix and tranlation vector*/
-	Camera(double fx, double fy, double cx, double cy, const cv::Matx33d &R, const cv::Vec3d &t, double k1 = 0.0, double k2 = 0.0);
+	Camera(FltType fx, FltType fy, FltType cx, FltType cy, const cv::Matx<FltType, 3, 3> &R, const VecType &t, FltType k1 = 0.0, FltType k2 = 0.0);
+	
 	/*Default constructor*/
 	Camera();
+	
 	/*Constructs camera by a 3x4 projection matrix*/
-	Camera(const cv::Matx34d & P, double k1 = 0.0, double k2 = 0.0);
-	/*Transforms a point in worlds cooridnate system to camera coordinate systems*/
-	cv::Point3d toCameraCoords(const cv::Point3d &pnt) const;
+	Camera(const cv::Matx<FltType, 3, 4> & P, FltType k1 = 0.0, FltType k2 = 0.0);
+	
+	/*Transforms a point in worlds cooridnate system to camera coordinate system*/
+	Point3Type toCameraCoords(const Point3Type &pnt) const;
+	
 	/*Computes point projection on image*/
-	cv::Point2d projectPoint(const cv::Point3d &pnt) const;
+	Point2Type projectPoint(const Point3Type &pnt) const;
+
 	/*Computes point projection on image (point is in camera coords)*/
-	cv::Point2d projectPointCamCoords(const cv::Point3d &pnt) const; 
+	Point2Type projectPointCamCoords(const Point3Type &pnt) const; 
+	
 	/*Returns 3x4 camera projection matrix*/
-	cv::Matx34d cameraMat() const;
+	cv::Matx<FltType, 3, 4> cameraMat() const;
+
 	/*Returns focal length along X axis (in pixels)*/
-	double fx() const;
+	FltType fx() const;
+	
 	/*Returns focal length along Y axis (in pixels)*/
-	double fy() const;
+	FltType fy() const;
+	
 	/*Returns X coordinate of the principal point*/
-	double cx() const;
+	FltType cx() const;
+	
 	/*Returns Y coordinate of the principal point*/
-	double cy() const;
+	FltType cy() const;
+	
 	/*Returns camera pose as cv::Affine3d*/
-	cv::Affine3d pose() const;
+	cv::Affine3<FltType> pose() const;
 	/*Camera translation*/
-	cv::Vec3d t;
+	VecType t;
 	/*Camera rotation*/
-	cv::Matx33d R;
+	cv::Matx<FltType, 3, 3> R;
 	/*Camera intrinsics
 		(fx  0 cx)
 		( 0 fy cy)
 		( 0  0  1)
 	*/
-	cv::Matx33d K;
+	cv::Matx<FltType, 3, 3> K;
 	/*Radial distortion coefficients*/
-	double k1, k2;
+	FltType k1, k2;
 private:
-	void distort(double &x, double &y) const;
+	void distort(FltType &x, FltType &y) const;
 };
 
 /*Serialization interface*/

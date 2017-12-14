@@ -26,7 +26,7 @@ SOFTWARE.
 #include "Slider.h"
 #include "Common.h"
 
-Slider::Slider(double  min, double max, double value, int trackWidth, int sliderHeight)
+Slider::Slider(FltType  min, FltType max, FltType value, int trackWidth, int sliderHeight)
 	: min(min), max(max), w(trackWidth), h(sliderHeight),
 	track(TRACK_OFFSET, (h - TRACK_HEIGHT) / 2, w, TRACK_HEIGHT),
 	button(0, sliderHeight / 2){
@@ -62,7 +62,7 @@ bool Slider::onButton(const cv::Point &pnt) const {
 	return 2.0*cv::norm(pnt - button) <= BUTTON_WIDTH;
 }
 
-void Slider::setValue(double newVal) {
+void Slider::setValue(FltType newVal) {
 	if (newVal < min) {
 		val = min;
 		return;
@@ -75,15 +75,15 @@ void Slider::setValue(double newVal) {
 	updateButtonPos();
 }
 
-double Slider::value() const {
+FltType Slider::value() const {
 	return val;
 }
 
-double Slider::minValue() const {
+FltType Slider::minValue() const {
 	return min;
 }
 
-double Slider::maxValue() const {
+FltType Slider::maxValue() const {
 	return max;
 }
 

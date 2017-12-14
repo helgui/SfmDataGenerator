@@ -32,8 +32,8 @@ using namespace cv;
 void CameraCustomizer::updateImage() {
 	Vec3b topColor(2, 1, 1);
 	Vec3b bottomColor(240, 120, 120);
-	double delta = 1.0 / img.rows;
-	double coeff = 0.0;
+	FltType delta = 1.0 / img.rows;
+	FltType coeff = 0.0;
 	for (int i = 0; i < img.rows; ++i, coeff += delta) {
 		img.row(i).setTo(interpolate(topColor, bottomColor, coeff));
 	}
@@ -86,10 +86,10 @@ CameraCustomizer::CameraCustomizer(const std::string &winName)
 	updateImage();
 }
 
-double CameraCustomizer::k1() const {
+FltType CameraCustomizer::k1() const {
 	return slider[0].value();
 }
 
-double CameraCustomizer::k2() const {
+FltType CameraCustomizer::k2() const {
 	return slider[1].value();
 }

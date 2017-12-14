@@ -21,6 +21,8 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkFloatArray.h>
+#include <vtkDoubleArray.h>
+#include <vtkDataArray.h>
 #include <vtkCellArray.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>

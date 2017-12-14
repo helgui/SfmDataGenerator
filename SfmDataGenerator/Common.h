@@ -26,7 +26,28 @@ SOFTWARE.
 #ifndef COMMON_H
 #define COMMON_H
 #include "stdafx.h"
-#include "Camera.h"
+
+#define SFMDATAGENERATOR_USE_DOUBLE
+
+#ifdef SFMDATAGENERATOR_USE_DOUBLE
+typedef double FltType;
+typedef vtkDoubleArray _vtkArrayType;
+#define TINYOBJLOADER_USE_DOUBLE
+#define _CV_FLT CV_64F
+#define _CV_FLT3 CV_64FC3
+#define _VTK_FLT VTK_DOUBLE
+#else
+typedef float FltType;
+typedef vtkFloatArray _vtkArrayType;
+#define SFMDATAGENERATOR_USE_FLOAT
+#define _CV_FLT CV_32F
+#define _CV_FLT3 CV_32FC3
+#define _VTK_FLT VTK_FLOAT
+#endif
+
+typedef cv::Vec<FltType, 3> VecType;
+typedef cv::Point3_<FltType> Point3Type;
+typedef cv::Point_<FltType> Point2Type;
 
 #define btw(v, a, b) ((v >= a) && (v < b))
 /*
@@ -38,14 +59,14 @@ public:
 	/*Scene point descriptor*/
 	int d;
 	/*x coordinate of projection*/
-	double x;
+	FltType x;
 	/*y coordinate of projection*/
-	double y;
-	Observation(int d, double x, double y)
+	FltType y;
+	Observation(int d, FltType x, FltType y)
 		: d(d), x(x), y(y) {}
 	Observation()
 		: Observation(0, 0.0, 0.0) {}
-	Observation(int d, const cv::Point2d &p)
+	Observation(int d, const cv::Point_<FltType> &p)
 		: d(d), x(p.x), y(p.y) {}
 	/*Makes observations comparable*/
 	bool operator <(const Observation & obs) {
@@ -149,13 +170,13 @@ static void writeMatx(std::ostream & os, const cv::Matx<Tp, m, n> & mat) {
 
 /*Two colors linear interpolation*/
 static inline
-cv::Vec3b interpolate(const cv::Vec3b & col1, const cv::Vec3b & col2, double value) {
+cv::Vec3b interpolate(const cv::Vec3b & col1, const cv::Vec3b & col2, FltType value) {
 	return (1.0 - value)*col1 + value*col2;
 }
 
 /*Maps value in the range [0; 1] to color in the range [blue; red]*/
 static inline
-cv::Vec3b valueToColor(double value) {
+cv::Vec3b valueToColor(FltType value) {
 	if (value < -1.0) value = -1.0;
 	if (value > 1.0) value = 1.0;
 	if (value <= 0.25) {
@@ -170,46 +191,30 @@ cv::Vec3b valueToColor(double value) {
 	return interpolate({0, 255, 255}, {0, 0, 255}, 4.0*value - 3.0);
 }
 
-template<class T>
-void centralize(cv::Mat &points, double cubeSize) {
-	typedef cv::Vec<T, 3> PointType;
-	PointType centroid(0, 0, 0);
-	for (auto it = points.begin<PointType>(); it != points.end<PointType>(); ++it) {
+static inline
+void centralize(cv::InputOutputArray pointsArray, FltType cubeSize = -1.0) {
+	cv::Mat points = pointsArray.getMat();
+	if (points.type() != _CV_FLT3) return;
+	VecType centroid(0, 0, 0);
+	for (auto it = points.begin<VecType>(); it != points.end<VecType>(); ++it) {
 		centroid += *it;
 	}
 	centroid *= 1.0 / points.total();
-	for (auto it = points.begin<PointType>(); it != points.end<PointType>(); ++it) {
+	for (auto it = points.begin<VecType>(); it != points.end<VecType>(); ++it) {
 		*it -= centroid;
 	}
-	cv::normalize(points, points, 0.5*cubeSize, 0.0, cv::NORM_INF);
+	if (cubeSize > 0.0)
+		cv::normalize(points, points, 0.5*cubeSize, 0.0, cv::NORM_INF);
 }
 
 static inline
-void centralize(cv::InputOutputArray _points) {
-	cv::Mat points = _points.getMat();
-	CV_Assert(points.type() == CV_32FC3 || points.type() == CV_64FC3);
-	if (points.type() == CV_32FC3)
-		centralize<float>(points, 1.0);
-	else
-		centralize<double>(points, 1.0);
-}
-
-/*
-static inline
-cv::viz::Mesh loadTexturedMesh(const std::string &meshFile, const std::string &texFile) {
-	auto inputType = cv::viz::Mesh::LOAD_PLY;
-	if (fileExt(meshFile) == ".obj")
-		inputType = cv::viz::Mesh::LOAD_OBJ;
-	auto mesh = cv::viz::Mesh::load(meshFile, inputType);
-	if (!texFile.empty())
-		mesh.texture = cv::imread(texFile);
-	if (mesh.cloud.type() == CV_32FC3) {
-		centralize<cv::Vec3f>(mesh.cloud);
-	}
-	if (mesh.cloud.type() == CV_64FC3) {
-		centralize<cv::Vec3d>(mesh.cloud);
+cv::viz::Mesh loadMeshTypeEnforced(const std::string &filename, int type) {
+	auto mesh = cv::viz::Mesh::load(filename, type);
+	if (mesh.cloud.depth() != _CV_FLT) {
+		mesh.cloud.convertTo(mesh.cloud, _CV_FLT);
+		mesh.normals.convertTo(mesh.normals, _CV_FLT);
+		mesh.tcoords.convertTo(mesh.tcoords, _CV_FLT);
 	}
 	return mesh;
 }
-*/
 #endif

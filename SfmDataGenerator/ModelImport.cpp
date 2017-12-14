@@ -63,7 +63,7 @@ Mat importObjModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) 
 		return Mat();
 	}
 
-	Mat pointsProxy = Mat(attributes.vertices, false).reshape(3);
+	Mat pointsProxy = Mat(attributes.vertices, false).reshape(3, 1);
 	centralize(pointsProxy);
 
 	vector<vector<index_t>> faces(materials.size() + 1);
@@ -85,10 +85,11 @@ Mat importObjModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) 
 		if (numFaceVertices[i].empty()) continue;
 		vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 		vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+		points->SetDataType(_VTK_FLT);
 		vtkSmartPointer<vtkCellArray> polys = vtkSmartPointer<vtkCellArray>::New();
-		vtkSmartPointer<vtkFloatArray> tcoords = vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkDataArray> tcoords = vtkSmartPointer<_vtkArrayType>::New();
 		tcoords->SetNumberOfComponents(2);
-		vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkDataArray> normals = vtkSmartPointer<_vtkArrayType>::New();
 		normals->SetNumberOfComponents(3);
 		size_t accum = 0;
 		for (int fv : numFaceVertices[i]) {
@@ -98,9 +99,9 @@ Mat importObjModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) 
 				points->InsertNextPoint(attributes.vertices.data() + 3 * index.vertex_index);
 				polys->InsertCellPoint(accum + v);
 				if (index.texcoord_index > -1) {
-					float u = attributes.texcoords[2 * index.texcoord_index];
-					float v = attributes.texcoords[2 * index.texcoord_index + 1];
-					if (FLIP_TCOORD_Y) v = 1.0f - v;
+					FltType u = attributes.texcoords[2 * index.texcoord_index];
+					FltType v = attributes.texcoords[2 * index.texcoord_index + 1];
+					if (FLIP_TCOORD_Y) v = 1.0 - v;
 					tcoords->InsertNextTuple2(u, v);
 				}
 				if (index.normal_index > -1) {
@@ -126,11 +127,11 @@ Mat importObjModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) 
 			viz3d.showWidget("mesh_" + to_string(i + 1), WMaterialMesh(polyData));
 		}
 	}
-	return returnCloud ? Mat(attributes.vertices, true).reshape(3) : Mat();
+	return returnCloud ? Mat(attributes.vertices, true).reshape(3, 1) : Mat();
 }
 
 Mat importPlyModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) {
-	Mesh mesh = Mesh::load(filename, Mesh::LOAD_PLY);
+	Mesh mesh = loadMeshTypeEnforced(filename, Mesh::LOAD_PLY);
 	centralize(mesh.cloud);
 	viz3d.showWidget("mesh_1", WMesh(mesh));
 	return returnCloud ? mesh.cloud : Mat();

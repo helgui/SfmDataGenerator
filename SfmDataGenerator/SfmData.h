@@ -72,14 +72,14 @@ public:
 	to coordinates of projection or
 	rounds its values to integer if stDev < 0
 	*/
-	void addGaussianNoise(double stDev);
+	void addGaussianNoise(FltType stDev);
 	/*Adds a given number of false observations*/
 	void addOutliers(int count);
 	/*
 	Adds false observations to SfmData by given
 	ratio
 	*/
-	void addOutliers(double ratio);
+	void addOutliers(FltType ratio);
 	/*Clean up all data*/
 	void clear();
 	void showInfo(std::ostream & os = std::cout) const;
@@ -88,7 +88,7 @@ public:
 	/*
 		Apply tranformation M to the scene points
 	*/
-	void applyTransform(const cv::Affine3d &M);
+	void applyTransform(const cv::Affine3<FltType> &M);
 
 	const auto& getCameras() const {
 		return cameras;
@@ -110,7 +110,7 @@ private:
 	/*Camera for each view*/
 	std::vector<Camera> cameras;
 	/*3D points*/
-	std::vector<cv::Point3d> cloud;
+	std::vector<Point3Type> cloud;
 	/*Image file names*/
 	std::vector<std::string> images;
 	/*loads SfmData from txt file*/
