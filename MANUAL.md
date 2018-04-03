@@ -37,7 +37,7 @@ Run dataset generation
 
 Usage:
 ```
-gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>] [-mode=<mode>]
+gen -in=<model> -tex=<texture> -out=<out-dir> [-format=<fmt>]  [-mode=<mode>]
 ```
 
 | Parameter     | Description                                      | Values        | Default |
