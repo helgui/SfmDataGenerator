@@ -46,7 +46,7 @@ Point2Type Camera::projectPointCamCoords(const Point3Type &pnt) const {
 	FltType x = pnt.x / pnt.z;
 	FltType y = pnt.y / pnt.z;
 	distort(x, y);
-	return cv::Point2d(K(0, 0)*x + K(0, 2), K(1, 1)*y + K(1, 2));
+	return Point2Type(K(0, 0)*x + K(0, 2), K(1, 1)*y + K(1, 2));
 }
 
 Point3Type Camera::toCameraCoords(const Point3Type &pnt) const {
@@ -86,12 +86,12 @@ Camera::Camera(FltType fx, FltType fy, FltType cx, FltType cy, const cv::Matx<Fl
 	K(0, 0) = fx;
 	K(0, 2) = cx;
 	K(1, 1) = fy;
-	K(1, 2) = cy;	
+	K(1, 2) = cy;
 }
 
 Camera::Camera(const cv::Matx<FltType, 3, 4> &P, FltType k1, FltType k2)
-	: k1(k1), k2(k2) {
-	cv::decomposeProjectionMatrix(P, K, R, t);
+    : k1(k1), k2(k2) {
+    cv::decomposeProjectionMatrix(P, K, R, t);
 }
 
 Camera::Camera()

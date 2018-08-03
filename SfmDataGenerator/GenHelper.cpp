@@ -116,7 +116,7 @@ void GenHelper::takeUsualPhoto() {
 	counter++;
 	os << imgFolder << "/" << setw(6) << setfill('0') << counter << ".png";
 	Mat undist;
-	vector<Vec2f> dist; //remap only works with floats
+	vector<Vec2f> dist; //remap works with floats only
 	for (int i = 0; i < img.rows; ++i) {
 		for (int j = 0; j < img.cols; ++j) {
 			dist.emplace_back((float)j, (float)i);

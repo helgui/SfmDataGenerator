@@ -64,7 +64,7 @@ void CameraCustomizer::updateImage() {
 }
 
 CameraCustomizer::CameraCustomizer(const std::string &winName)
-	: winName(winName), control(-1), changing(0), slider{
+	: winName(winName), control(-1), changing(0), slider {
 		{ -0.5, 0.5, 0, SLIDER_WIDTH, SLIDER_HEIGHT },
 		{ -0.5, 0.5, 0, SLIDER_WIDTH, SLIDER_HEIGHT } },
 	img(SLIDER_HEIGHT * 4 /*SLIDER_OFFSET + Slider::width(SLIDER_WIDTH)*/,
