@@ -290,15 +290,16 @@ void genDataset(SfmData &sfmData, const string &inFile, const string &outDir, Mo
 
 		if (event.symbol == "space") {
 			helper->takePhoto();
-			return;
-		}
-		if (event.symbol == "m") {
+		} else if (event.symbol == "m") {
 			helper->changeCameraParams();
-			return;
-		}
-		if (event.symbol == "z") {
+		} else if (event.symbol == "z") {
 			helper->hideCameraParams();
-			return;
+		} else if (event.symbol == "b") {
+			helper->viz.setBackgroundColor(viz::Color::black());
+		} else if (event.symbol == "i") {
+			helper->viz.setBackgroundColor(viz::Color::white());
+		} else if (event.symbol == "d") {
+			helper->viz.setBackgroundMeshLab();
 		}
 	}, &helper);
 
