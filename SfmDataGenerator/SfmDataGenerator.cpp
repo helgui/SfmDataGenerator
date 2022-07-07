@@ -314,7 +314,7 @@ void genDataset(SfmData &sfmData, const string &inFile, const string &outDir, Mo
 	
 	while (!viz.wasStopped()) {
 		//helper.showCameraParams();
-		viz.spinOnce(300, true);
+		viz.spinOnce(30, true);
 	}
 	if (mode == Mode::SFM) {
 		sfmData.fillCloud(cloud);

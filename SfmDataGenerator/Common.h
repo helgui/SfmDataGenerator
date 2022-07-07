@@ -30,15 +30,15 @@ SOFTWARE.
 #define SFMDATAGENERATOR_USE_DOUBLE
 
 #ifdef SFMDATAGENERATOR_USE_DOUBLE
-typedef double FltType;
-typedef vtkDoubleArray _vtkArrayType;
+using FltType = double;
+using _vtkArrayType = vtkDoubleArray;
 #define TINYOBJLOADER_USE_DOUBLE
 #define _CV_FLT CV_64F
 #define _CV_FLT3 CV_64FC3
 #define _VTK_FLT VTK_DOUBLE
 #else
-typedef float FltType;
-typedef vtkFloatArray _vtkArrayType;
+using FltType = float;
+using _vtkArrayType = vtkFloatArray;
 #define SFMDATAGENERATOR_USE_FLOAT
 #define _CV_FLT CV_32F
 #define _CV_FLT3 CV_32FC3
@@ -108,12 +108,7 @@ std::string toLower(const std::string &s) {
 /*Extracts file extension*/
 static inline 
 std::string fileExt(const std::string &filename) {
-	for (int j = filename.size() - 1; j >= 0; --j) {
-		if (filename[j] == '.') {
-			return toLower(filename.substr(j, filename.size() - j));
-		}
-	}
-	return std::string();
+	return std::filesystem::path(filename).extension().string();
 }
 
 static inline

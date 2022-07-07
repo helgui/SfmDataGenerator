@@ -62,9 +62,7 @@ Mat importObjModel(const std::string &filename, Viz3d &viz3d, bool returnCloud) 
 		cerr << "TinyObj: can't parse " << filename << endl;
 		return Mat();
 	}
-
 	Mat pointsProxy = Mat(attributes.vertices, false).reshape(3, 1);
-	centralize(pointsProxy);
 
 	vector<vector<index_t>> faces(materials.size() + 1);
 	vector<vector<int>> numFaceVertices(materials.size() + 1);

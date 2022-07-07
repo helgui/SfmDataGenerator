@@ -32,8 +32,7 @@ void matToImageData(const Mat &from, vtkImageData *to) {
 	Vec3b* dptr = reinterpret_cast<Vec3b*>(to->GetScalarPointer());
 	size_t elem_step = to->GetIncrements()[1] / sizeof(Vec3b);
 
-	for (int y = 0; y < from.rows; ++y)
-	{
+	for (int y = 0; y < from.rows; ++y) {
 		Vec3b* drow = dptr + elem_step * y;
 		const unsigned char *srow = from.ptr<unsigned char>(y);
 		for (int x = 0; x < from.cols; ++x, srow += from.channels())
@@ -43,7 +42,6 @@ void matToImageData(const Mat &from, vtkImageData *to) {
 
 WMaterialMesh::WMaterialMesh(vtkPolyData *polyData, const material_t &material) {
 	vtkSmartPointer<vtkPolyDataMapper> mapper(vtkPolyDataMapper::New());
-	mapper->ImmediateModeRenderingOff();
 	mapper->SetInputData(polyData);
 	vtkSmartPointer<vtkActor> actor(vtkActor::New());
 	actor->SetMapper(mapper);
@@ -52,7 +50,7 @@ WMaterialMesh::WMaterialMesh(vtkPolyData *polyData, const material_t &material) 
 	prop->SetAmbientColor(material.ambient[0], material.ambient[1], material.ambient[2]);
 	prop->SetSpecularColor(material.specular[0], material.specular[1], material.specular[2]);
 	prop->LightingOn();
-	prop->ShadingOn();
+	prop->ShadingOff();
 	prop->SetInterpolationToPhong();
 	prop->SetOpacity(material.dissolve);
 	prop->SetSpecularPower(material.shininess);
@@ -81,7 +79,6 @@ WMaterialMesh::WMaterialMesh(vtkPolyData *polyData, const material_t &material) 
 
 WMaterialMesh::WMaterialMesh(vtkPolyData *polyData) {
 	vtkSmartPointer<vtkPolyDataMapper> mapper(vtkPolyDataMapper::New());
-	mapper->ImmediateModeRenderingOff();
 	mapper->SetInputData(polyData);
 	vtkSmartPointer<vtkActor> actor(vtkActor::New());
 	actor->SetMapper(mapper);
